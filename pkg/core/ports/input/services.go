@@ -1,8 +1,8 @@
 package input
 
-import "github.com/olegshishkin/financier/internal/core/domain"
+import "github.com/olegshishkin/financier/pkg/core/domain"
 
-type UserServicePort interface {
+type UserService interface {
 	Create(name, email string) (*domain.User, error)
 	Get(email string) (*domain.User, error)
 	Update(user *domain.User) error

@@ -1,8 +1,8 @@
 package output
 
-import "github.com/olegshishkin/financier/internal/core/domain"
+import "github.com/olegshishkin/financier/pkg/core/domain"
 
-type UserStoragePort interface {
+type UserStorage interface {
 	Create(user *domain.User) error
 	Get(id uint64) (*domain.User, error)
 	FindActiveByEmail(email string) (*domain.User, error)
