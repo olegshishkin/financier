@@ -8,15 +8,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-type service struct {
+type UsrSvc struct {
 	storage output.UserStorage
 }
 
-func NewService(storage output.UserStorage) *service {
-	return &service{storage}
+func NewService(storage output.UserStorage) *UsrSvc {
+	return &UsrSvc{storage}
 }
 
-func (s *service) Create(name, email string) (user *domain.User, err error) {
+func (s *UsrSvc) Create(name, email string) (user *domain.User, err error) {
 	defer func() {
 		if err != nil {
 			err = errors.Wrap(err, "user hasn't been created")
@@ -44,7 +44,7 @@ func (s *service) Create(name, email string) (user *domain.User, err error) {
 	return user, nil
 }
 
-func (s *service) Get(email string) (*domain.User, error) {
+func (s *UsrSvc) Get(email string) (*domain.User, error) {
 	if email == "" {
 		return nil, errors.Errorf("no email")
 	}
@@ -57,7 +57,7 @@ func (s *service) Get(email string) (*domain.User, error) {
 	return user, nil
 }
 
-func (s *service) Update(user *domain.User) (err error) {
+func (s *UsrSvc) Update(user *domain.User) (err error) {
 	defer func() {
 		if err != nil {
 			err = errors.Wrap(err, "user hasn't been updated")
@@ -91,7 +91,7 @@ func (s *service) Update(user *domain.User) (err error) {
 	return nil
 }
 
-func (s *service) Disable(id uint64) (err error) {
+func (s *UsrSvc) Disable(id uint64) (err error) {
 	defer func() {
 		if err != nil {
 			err = errors.Wrap(err, "user hasn't been disabled")

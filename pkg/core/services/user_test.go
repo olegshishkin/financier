@@ -146,7 +146,7 @@ func TestService_Create(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &service{storage: storageMock}
+			target := &UsrSvc{storage: storageMock}
 
 			if tt.findActiveByEmailArgs.email != "" {
 				storageMock.EXPECT().
@@ -255,7 +255,7 @@ func TestService_Disable(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &service{storage: storageMock}
+			target := &UsrSvc{storage: storageMock}
 
 			if tt.getArgs.id != 0 {
 				storageMock.EXPECT().
@@ -356,7 +356,7 @@ func TestService_Get(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &service{storage: storageMock}
+			target := &UsrSvc{storage: storageMock}
 
 			if tt.findActiveByEmailArgs.email != "" {
 				storageMock.EXPECT().
@@ -579,7 +579,7 @@ func TestService_Update(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &service{storage: storageMock}
+			target := &UsrSvc{storage: storageMock}
 
 			if tt.args.user != nil && tt.args.user.ID != 0 {
 				storageMock.EXPECT().
