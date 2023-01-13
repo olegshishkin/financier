@@ -7,11 +7,11 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id"`
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Disabled bool   `json:"-"`
-	Version  int64  `json:"version"`
+	ID       string
+	Name     string
+	Email    string
+	Disabled bool
+	Version  uint64
 }
 
 func NewUser(name, email string) *User {
