@@ -71,7 +71,7 @@ func (s *UsrSvc) Update(user *domain.User) (err error) {
 
 	if user == nil {
 		err = errors.Errorf("no argument")
-		return
+		return err
 	}
 
 	original, err := s.storage.Get(user.ID)
@@ -80,7 +80,8 @@ func (s *UsrSvc) Update(user *domain.User) (err error) {
 	}
 
 	if original == nil {
-		return errors.Errorf("no user found")
+		err = errors.Errorf("no user found")
+		return err
 	}
 
 	if err = original.UpdateFrom(*user); err != nil {
@@ -114,7 +115,8 @@ func (s *UsrSvc) Disable(id string) (err error) {
 	}
 
 	if user == nil {
-		return errors.Errorf("no user found")
+		err = errors.Errorf("no user found")
+		return err
 	}
 
 	if err = user.Disable(); err != nil {
