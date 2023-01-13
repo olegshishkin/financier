@@ -57,8 +57,8 @@ func (_c *UserStorage_Create_Call) Return(_a0 error) *UserStorage_Create_Call {
 	return _c
 }
 
-// FindActiveByEmail provides a mock function with given fields: email
-func (_m *UserStorage) FindActiveByEmail(email string) (*domain.User, error) {
+// FindEnabledByEmail provides a mock function with given fields: email
+func (_m *UserStorage) FindEnabledByEmail(email string) (*domain.User, error) {
 	ret := _m.Called(email)
 
 	var r0 *domain.User
@@ -80,25 +80,25 @@ func (_m *UserStorage) FindActiveByEmail(email string) (*domain.User, error) {
 	return r0, r1
 }
 
-// UserStorage_FindActiveByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindActiveByEmail'
-type UserStorage_FindActiveByEmail_Call struct {
+// UserStorage_FindEnabledByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindEnabledByEmail'
+type UserStorage_FindEnabledByEmail_Call struct {
 	*mock.Call
 }
 
-// FindActiveByEmail is a helper method to define mock.On call
+// FindEnabledByEmail is a helper method to define mock.On call
 //   - email string
-func (_e *UserStorage_Expecter) FindActiveByEmail(email interface{}) *UserStorage_FindActiveByEmail_Call {
-	return &UserStorage_FindActiveByEmail_Call{Call: _e.mock.On("FindActiveByEmail", email)}
+func (_e *UserStorage_Expecter) FindEnabledByEmail(email interface{}) *UserStorage_FindEnabledByEmail_Call {
+	return &UserStorage_FindEnabledByEmail_Call{Call: _e.mock.On("FindEnabledByEmail", email)}
 }
 
-func (_c *UserStorage_FindActiveByEmail_Call) Run(run func(email string)) *UserStorage_FindActiveByEmail_Call {
+func (_c *UserStorage_FindEnabledByEmail_Call) Run(run func(email string)) *UserStorage_FindEnabledByEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string))
 	})
 	return _c
 }
 
-func (_c *UserStorage_FindActiveByEmail_Call) Return(_a0 *domain.User, _a1 error) *UserStorage_FindActiveByEmail_Call {
+func (_c *UserStorage_FindEnabledByEmail_Call) Return(_a0 *domain.User, _a1 error) *UserStorage_FindEnabledByEmail_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }

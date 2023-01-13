@@ -30,7 +30,7 @@ func (s *UsrSvc) Create(name, email string) (user *domain.User, err error) {
 
 	normEmail := strings.ToLower(email)
 
-	user, err = s.storage.FindActiveByEmail(normEmail)
+	user, err = s.storage.FindEnabledByEmail(normEmail)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (s *UsrSvc) Get(email string) (*domain.User, error) {
 		return nil, errors.Errorf("no email")
 	}
 
-	user, err := s.storage.FindActiveByEmail(email)
+	user, err := s.storage.FindEnabledByEmail(email)
 	if err != nil {
 		return nil, errors.Wrap(err, "user search has been failed")
 	}

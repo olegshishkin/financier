@@ -14,11 +14,11 @@ func TestService_NewService(t *testing.T) {
 }
 
 func TestService_Create(t *testing.T) {
-	type findActiveByEmailArgs struct {
+	type findEnabledByEmailArgs struct {
 		email string
 	}
 
-	type findActiveByEmailReturn struct {
+	type findEnabledByEmailReturn struct {
 		user *domain.User
 		err  error
 	}
@@ -45,8 +45,8 @@ func TestService_Create(t *testing.T) {
 		name string
 		args
 		expected
-		findActiveByEmailArgs
-		findActiveByEmailReturn
+		findEnabledByEmailArgs
+		findEnabledByEmailReturn
 		createArgs
 		createReturn
 	}{
@@ -63,8 +63,8 @@ func TestService_Create(t *testing.T) {
 				},
 				wantErr: false,
 			},
-			findActiveByEmailArgs:   findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
+			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
 					ID:      "",
@@ -88,8 +88,8 @@ func TestService_Create(t *testing.T) {
 				},
 				wantErr: false,
 			},
-			findActiveByEmailArgs:   findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
+			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
 					ID:      "",
@@ -116,11 +116,11 @@ func TestService_Create(t *testing.T) {
 			expected: expected{user: nil, wantErr: true},
 		},
 		{
-			name:                  "userAlreadyExists",
-			args:                  args{name: "name1", email: "email1"},
-			expected:              expected{user: nil, wantErr: true},
-			findActiveByEmailArgs: findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{
+			name:                   "userAlreadyExists",
+			args:                   args{name: "name1", email: "email1"},
+			expected:               expected{user: nil, wantErr: true},
+			findEnabledByEmailArgs: findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{
 				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
@@ -132,18 +132,18 @@ func TestService_Create(t *testing.T) {
 			},
 		},
 		{
-			name:                    "findUserFailed",
-			args:                    args{name: "name1", email: "email1"},
-			expected:                expected{user: nil, wantErr: true},
-			findActiveByEmailArgs:   findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: errors.New("")},
+			name:                     "findUserFailed",
+			args:                     args{name: "name1", email: "email1"},
+			expected:                 expected{user: nil, wantErr: true},
+			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
 		},
 		{
-			name:                    "createFailed",
-			args:                    args{name: "name1", email: "email1"},
-			expected:                expected{user: nil, wantErr: true},
-			findActiveByEmailArgs:   findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
+			name:                     "createFailed",
+			args:                     args{name: "name1", email: "email1"},
+			expected:                 expected{user: nil, wantErr: true},
+			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
 					ID:      "",
@@ -163,10 +163,10 @@ func TestService_Create(t *testing.T) {
 			storageMock := mocks.NewUserStorage(t)
 			target := &UsrSvc{storage: storageMock}
 
-			if tt.findActiveByEmailArgs.email != "" {
+			if tt.findEnabledByEmailArgs.email != "" {
 				storageMock.EXPECT().
-					FindActiveByEmail(tt.findActiveByEmailArgs.email).
-					Return(tt.findActiveByEmailReturn.user, tt.findActiveByEmailReturn.err)
+					FindEnabledByEmail(tt.findEnabledByEmailArgs.email).
+					Return(tt.findEnabledByEmailReturn.user, tt.findEnabledByEmailReturn.err)
 			}
 
 			if tt.createArgs.user != nil {
@@ -302,11 +302,11 @@ func TestService_Disable(t *testing.T) {
 }
 
 func TestService_Get(t *testing.T) {
-	type findActiveByEmailArgs struct {
+	type findEnabledByEmailArgs struct {
 		email string
 	}
 
-	type findActiveByEmailReturn struct {
+	type findEnabledByEmailReturn struct {
 		user *domain.User
 		err  error
 	}
@@ -324,8 +324,8 @@ func TestService_Get(t *testing.T) {
 		name string
 		args
 		expected
-		findActiveByEmailArgs
-		findActiveByEmailReturn
+		findEnabledByEmailArgs
+		findEnabledByEmailReturn
 	}{
 		{
 			name: "success",
@@ -339,8 +339,8 @@ func TestService_Get(t *testing.T) {
 					Version:  0,
 				},
 				wantErr: false},
-			findActiveByEmailArgs: findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{
+			findEnabledByEmailArgs: findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{
 				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
@@ -356,18 +356,18 @@ func TestService_Get(t *testing.T) {
 			expected: expected{user: nil, wantErr: true},
 		},
 		{
-			name:                    "findUserFailed",
-			args:                    args{email: "email1"},
-			expected:                expected{user: nil, wantErr: true},
-			findActiveByEmailArgs:   findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: errors.New("")},
+			name:                     "findUserFailed",
+			args:                     args{email: "email1"},
+			expected:                 expected{user: nil, wantErr: true},
+			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
 		},
 		{
-			name:                    "noUser",
-			args:                    args{email: "email1"},
-			expected:                expected{user: nil, wantErr: false},
-			findActiveByEmailArgs:   findActiveByEmailArgs{email: "email1"},
-			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
+			name:                     "noUser",
+			args:                     args{email: "email1"},
+			expected:                 expected{user: nil, wantErr: false},
+			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 		},
 	}
 
@@ -378,10 +378,10 @@ func TestService_Get(t *testing.T) {
 			storageMock := mocks.NewUserStorage(t)
 			target := &UsrSvc{storage: storageMock}
 
-			if tt.findActiveByEmailArgs.email != "" {
+			if tt.findEnabledByEmailArgs.email != "" {
 				storageMock.EXPECT().
-					FindActiveByEmail(tt.findActiveByEmailArgs.email).
-					Return(tt.findActiveByEmailReturn.user, tt.findActiveByEmailReturn.err)
+					FindEnabledByEmail(tt.findEnabledByEmailArgs.email).
+					Return(tt.findEnabledByEmailReturn.user, tt.findEnabledByEmailReturn.err)
 			}
 
 			got, err := target.Get(tt.args.email)
