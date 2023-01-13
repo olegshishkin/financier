@@ -3,10 +3,11 @@ package domain
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 type User struct {
-	ID       uint64 `json:"id"`
+	ID       string `json:"id"`
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Disabled bool   `json:"-"`
@@ -48,11 +49,20 @@ func (u *User) Disable() error {
 }
 
 func (u *User) Exists() bool {
-	return u.ID > 0
+	if u == nil || u.ID == "" {
+		return false
+	}
+
+	number, err := strconv.Atoi(u.ID)
+	if err != nil {
+		return true
+	}
+
+	return number > 0
 }
 
 func (u *User) String() string {
-	if u.Name == "" && u.Email == "" {
+	if u == nil || (u.Name == "" && u.Email == "") {
 		return ""
 	}
 

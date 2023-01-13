@@ -6,5 +6,5 @@ type UserService interface {
 	Create(name, email string) (*domain.User, error)
 	Get(email string) (*domain.User, error)
 	Update(user *domain.User) error
-	Disable(id uint64) error
+	Disable(id string) error
 }

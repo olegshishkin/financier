@@ -55,7 +55,7 @@ func TestService_Create(t *testing.T) {
 			args: args{name: "name1", email: "email1"},
 			expected: expected{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -67,7 +67,7 @@ func TestService_Create(t *testing.T) {
 			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
-					ID:      0,
+					ID:      "",
 					Name:    "name1",
 					Email:   "email1",
 					Version: 0,
@@ -80,7 +80,7 @@ func TestService_Create(t *testing.T) {
 			args: args{name: "name1", email: "eMaIl1"},
 			expected: expected{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -92,7 +92,7 @@ func TestService_Create(t *testing.T) {
 			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
-					ID:      0,
+					ID:      "",
 					Name:    "name1",
 					Email:   "email1",
 					Version: 0,
@@ -101,13 +101,28 @@ func TestService_Create(t *testing.T) {
 			createReturn: createReturn{err: nil},
 		},
 		{
+			name:     "noName",
+			args:     args{name: "", email: "email1"},
+			expected: expected{user: nil, wantErr: true},
+		},
+		{
+			name:     "noEmail",
+			args:     args{name: "name1", email: ""},
+			expected: expected{user: nil, wantErr: true},
+		},
+		{
+			name:     "noArgs",
+			args:     args{name: "", email: ""},
+			expected: expected{user: nil, wantErr: true},
+		},
+		{
 			name:                  "userAlreadyExists",
 			args:                  args{name: "name1", email: "email1"},
 			expected:              expected{user: nil, wantErr: true},
 			findActiveByEmailArgs: findActiveByEmailArgs{email: "email1"},
 			findActiveByEmailReturn: findActiveByEmailReturn{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -131,7 +146,7 @@ func TestService_Create(t *testing.T) {
 			findActiveByEmailReturn: findActiveByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
-					ID:      0,
+					ID:      "",
 					Name:    "name1",
 					Email:   "email1",
 					Version: 0,
@@ -158,8 +173,8 @@ func TestService_Create(t *testing.T) {
 				storageMock.EXPECT().
 					Create(tt.createArgs.user).
 					Run(func(user *domain.User) {
-						if user != nil && user.ID == 0 {
-							user.ID = 1
+						if !user.Exists() {
+							user.ID = "1"
 						}
 					}).
 					Return(tt.createReturn.err)
@@ -175,7 +190,7 @@ func TestService_Create(t *testing.T) {
 
 func TestService_Disable(t *testing.T) {
 	type getArgs struct {
-		id uint64
+		id string
 	}
 
 	type getReturn struct {
@@ -192,7 +207,7 @@ func TestService_Disable(t *testing.T) {
 	}
 
 	type args struct {
-		id uint64
+		id string
 	}
 
 	type expected struct {
@@ -211,41 +226,46 @@ func TestService_Disable(t *testing.T) {
 	}{
 		{
 			name:         "success",
-			args:         args{id: 1},
-			expected:     expected{user: &domain.User{ID: 1, Disabled: true, Version: 1}, wantErr: false},
-			getArgs:      getArgs{id: 1},
-			getReturn:    getReturn{user: &domain.User{ID: 1, Version: 0}, err: nil},
-			updateArgs:   updateArgs{&domain.User{ID: 1, Disabled: true}},
+			args:         args{id: "1"},
+			expected:     expected{user: &domain.User{ID: "1", Disabled: true, Version: 1}, wantErr: false},
+			getArgs:      getArgs{id: "1"},
+			getReturn:    getReturn{user: &domain.User{ID: "1", Version: 0}, err: nil},
+			updateArgs:   updateArgs{&domain.User{ID: "1", Disabled: true}},
 			updateReturn: updateReturn{err: nil},
 		},
 		{
+			name:     "noArg",
+			args:     args{id: ""},
+			expected: expected{wantErr: true},
+		},
+		{
 			name:      "noUser",
-			args:      args{id: 1},
+			args:      args{id: "1"},
 			expected:  expected{wantErr: true},
-			getArgs:   getArgs{id: 1},
+			getArgs:   getArgs{id: "1"},
 			getReturn: getReturn{user: nil, err: nil},
 		},
 		{
 			name:      "getUserFailed",
-			args:      args{id: 1},
+			args:      args{id: "1"},
 			expected:  expected{wantErr: true},
-			getArgs:   getArgs{id: 1},
+			getArgs:   getArgs{id: "1"},
 			getReturn: getReturn{user: nil, err: errors.New("")},
 		},
 		{
 			name:      "disableFailed",
-			args:      args{id: 1},
-			expected:  expected{user: &domain.User{ID: 1, Disabled: true, Version: 0}, wantErr: true},
-			getArgs:   getArgs{id: 1},
-			getReturn: getReturn{user: &domain.User{ID: 1, Disabled: true, Version: 0}, err: nil},
+			args:      args{id: "1"},
+			expected:  expected{user: &domain.User{ID: "1", Disabled: true, Version: 0}, wantErr: true},
+			getArgs:   getArgs{id: "1"},
+			getReturn: getReturn{user: &domain.User{ID: "1", Disabled: true, Version: 0}, err: nil},
 		},
 		{
 			name:         "updateFailed",
-			args:         args{id: 1},
-			expected:     expected{user: &domain.User{ID: 1, Disabled: true, Version: 0}, wantErr: true},
-			getArgs:      getArgs{id: 1},
-			getReturn:    getReturn{user: &domain.User{ID: 1, Version: 0}, err: nil},
-			updateArgs:   updateArgs{&domain.User{ID: 1, Disabled: true}},
+			args:         args{id: "1"},
+			expected:     expected{user: &domain.User{ID: "1", Disabled: true, Version: 0}, wantErr: true},
+			getArgs:      getArgs{id: "1"},
+			getReturn:    getReturn{user: &domain.User{ID: "1", Version: 0}, err: nil},
+			updateArgs:   updateArgs{&domain.User{ID: "1", Disabled: true}},
 			updateReturn: updateReturn{err: errors.New("")},
 		},
 	}
@@ -257,7 +277,7 @@ func TestService_Disable(t *testing.T) {
 			storageMock := mocks.NewUserStorage(t)
 			target := &UsrSvc{storage: storageMock}
 
-			if tt.getArgs.id != 0 {
+			if tt.getArgs.id != "" {
 				storageMock.EXPECT().
 					Get(tt.getArgs.id).
 					Return(tt.getReturn.user, tt.getReturn.err)
@@ -312,7 +332,7 @@ func TestService_Get(t *testing.T) {
 			args: args{email: "email1"},
 			expected: expected{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -322,7 +342,7 @@ func TestService_Get(t *testing.T) {
 			findActiveByEmailArgs: findActiveByEmailArgs{email: "email1"},
 			findActiveByEmailReturn: findActiveByEmailReturn{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -407,7 +427,7 @@ func TestService_Update(t *testing.T) {
 			name: "success",
 			args: args{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 1,
@@ -415,7 +435,7 @@ func TestService_Update(t *testing.T) {
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1_changed",
 					Email:    "email1_changed",
 					Disabled: false,
@@ -425,7 +445,7 @@ func TestService_Update(t *testing.T) {
 			},
 			getReturn: getReturn{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -435,7 +455,7 @@ func TestService_Update(t *testing.T) {
 			},
 			updateArgs: updateArgs{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1_changed",
 					Email:    "email1_changed",
 					Disabled: false,
@@ -458,7 +478,7 @@ func TestService_Update(t *testing.T) {
 			name: "noUser",
 			args: args{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 0,
@@ -466,7 +486,7 @@ func TestService_Update(t *testing.T) {
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 0,
@@ -482,7 +502,7 @@ func TestService_Update(t *testing.T) {
 			name: "getUserFailed",
 			args: args{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 0,
@@ -490,7 +510,7 @@ func TestService_Update(t *testing.T) {
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 0,
@@ -506,7 +526,7 @@ func TestService_Update(t *testing.T) {
 			name: "disabledUser",
 			args: args{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 0,
@@ -514,7 +534,7 @@ func TestService_Update(t *testing.T) {
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 0,
@@ -523,7 +543,7 @@ func TestService_Update(t *testing.T) {
 			},
 			getReturn: getReturn{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: true,
@@ -536,7 +556,7 @@ func TestService_Update(t *testing.T) {
 			name: "updateFailed",
 			args: args{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 1,
@@ -544,7 +564,7 @@ func TestService_Update(t *testing.T) {
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      1,
+					ID:      "1",
 					Name:    "name1_changed",
 					Email:   "email1_changed",
 					Version: 1,
@@ -553,7 +573,7 @@ func TestService_Update(t *testing.T) {
 			},
 			getReturn: getReturn{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
@@ -563,7 +583,7 @@ func TestService_Update(t *testing.T) {
 			},
 			updateArgs: updateArgs{
 				user: &domain.User{
-					ID:       1,
+					ID:       "1",
 					Name:     "name1_changed",
 					Email:    "email1_changed",
 					Disabled: false,
@@ -581,13 +601,13 @@ func TestService_Update(t *testing.T) {
 			storageMock := mocks.NewUserStorage(t)
 			target := &UsrSvc{storage: storageMock}
 
-			if tt.args.user != nil && tt.args.user.ID != 0 {
+			if tt.args.user.Exists() {
 				storageMock.EXPECT().
 					Get(tt.args.user.ID).
 					Return(tt.getReturn.user, tt.getReturn.err)
 			}
 
-			if tt.updateArgs.user != nil && tt.updateArgs.user.ID != 0 {
+			if tt.updateArgs.user.Exists() {
 				storageMock.EXPECT().
 					Update(tt.updateArgs.user).
 					Run(func(user *domain.User) {

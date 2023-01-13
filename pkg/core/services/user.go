@@ -23,6 +23,11 @@ func (s *UsrSvc) Create(name, email string) (user *domain.User, err error) {
 		}
 	}()
 
+	if name == "" || email == "" {
+		err = errors.Errorf("invalid args, name: %s, email: %s", name, email)
+		return nil, err
+	}
+
 	normEmail := strings.ToLower(email)
 
 	user, err = s.storage.FindActiveByEmail(normEmail)
@@ -91,12 +96,17 @@ func (s *UsrSvc) Update(user *domain.User) (err error) {
 	return nil
 }
 
-func (s *UsrSvc) Disable(id uint64) (err error) {
+func (s *UsrSvc) Disable(id string) (err error) {
 	defer func() {
 		if err != nil {
 			err = errors.Wrap(err, "user hasn't been disabled")
 		}
 	}()
+
+	if id == "" {
+		err = errors.Errorf("invalid arg: %s", id)
+		return err
+	}
 
 	user, err := s.storage.Get(id)
 	if err != nil {

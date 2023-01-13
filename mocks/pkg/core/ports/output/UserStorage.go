@@ -104,11 +104,11 @@ func (_c *UserStorage_FindActiveByEmail_Call) Return(_a0 *domain.User, _a1 error
 }
 
 // Get provides a mock function with given fields: id
-func (_m *UserStorage) Get(id uint64) (*domain.User, error) {
+func (_m *UserStorage) Get(id string) (*domain.User, error) {
 	ret := _m.Called(id)
 
 	var r0 *domain.User
-	if rf, ok := ret.Get(0).(func(uint64) *domain.User); ok {
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
@@ -117,7 +117,7 @@ func (_m *UserStorage) Get(id uint64) (*domain.User, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint64) error); ok {
+	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
@@ -132,14 +132,14 @@ type UserStorage_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - id uint64
+//   - id string
 func (_e *UserStorage_Expecter) Get(id interface{}) *UserStorage_Get_Call {
 	return &UserStorage_Get_Call{Call: _e.mock.On("Get", id)}
 }
 
-func (_c *UserStorage_Get_Call) Run(run func(id uint64)) *UserStorage_Get_Call {
+func (_c *UserStorage_Get_Call) Run(run func(id string)) *UserStorage_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uint64))
+		run(args[0].(string))
 	})
 	return _c
 }
