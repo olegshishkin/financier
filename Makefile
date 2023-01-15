@@ -50,7 +50,7 @@ lint: cover
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: lint$(RESET_COLOR)'
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run ./... -c ./.lint/.golangci.yml
+	golangci-lint run ./...
 .PHONY:lint
 
 build: lint
