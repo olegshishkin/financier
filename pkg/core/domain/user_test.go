@@ -1,18 +1,23 @@
-package domain
+package domain_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/olegshishkin/financier/pkg/core/domain"
 )
 
 func TestNewUser(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		name  string
 		email string
 	}
 
 	type expected struct {
-		user *User
+		user *domain.User
 	}
 
 	tests := []struct {
@@ -21,27 +26,53 @@ func TestNewUser(t *testing.T) {
 		expected
 	}{
 		{
-			name:     "success",
-			args:     args{name: "name1", email: "email1"},
-			expected: expected{user: &User{Name: "name1", Email: "email1"}},
+			name: "success",
+			args: args{name: "name1", email: "email1"},
+			expected: expected{
+				user: &domain.User{
+					ID:       "",
+					Name:     "name1",
+					Email:    "email1",
+					Disabled: false,
+					Version:  0,
+				},
+			},
 		},
 		{
-			name:     "noArgs",
-			args:     args{},
-			expected: expected{user: &User{}},
+			name: "noArgs",
+			args: args{name: "", email: ""},
+			expected: expected{
+				user: &domain.User{
+					ID:       "",
+					Name:     "",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
+			},
 		},
 		{
-			name:     "onlyName",
-			args:     args{name: "name1"},
-			expected: expected{user: &User{Name: "name1"}},
+			name: "onlyName",
+			args: args{name: "name1", email: ""},
+			expected: expected{
+				user: &domain.User{
+					ID:       "",
+					Name:     "name1",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
+			},
 		},
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
-			user := NewUser(tt.args.name, tt.args.email)
+			user := domain.NewUser(tt.args.name, tt.args.email)
 
 			assertions.Equal(tt.expected.user, user)
 		})
@@ -49,12 +80,14 @@ func TestNewUser(t *testing.T) {
 }
 
 func TestUser_Disable(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
-		user *User
+		user *domain.User
 	}
 
 	type expected struct {
-		user    *User
+		user    *domain.User
 		wantErr bool
 	}
 
@@ -66,7 +99,7 @@ func TestUser_Disable(t *testing.T) {
 		{
 			name: "success",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -75,7 +108,7 @@ func TestUser_Disable(t *testing.T) {
 				},
 			},
 			expected: expected{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -98,17 +131,29 @@ func TestUser_Disable(t *testing.T) {
 		{
 			name: "blankUser",
 			args: args{
-				user: &User{},
+				user: &domain.User{
+					ID:       "",
+					Name:     "",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
 			},
 			expected: expected{
-				user:    &User{},
+				user: &domain.User{
+					ID:       "",
+					Name:     "",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
 				wantErr: true,
 			},
 		},
 		{
 			name: "userDoesNotExist",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "0",
 					Name:     "name1",
 					Email:    "email1",
@@ -117,7 +162,7 @@ func TestUser_Disable(t *testing.T) {
 				},
 			},
 			expected: expected{
-				user: &User{
+				user: &domain.User{
 					ID:       "0",
 					Name:     "name1",
 					Email:    "email1",
@@ -130,7 +175,7 @@ func TestUser_Disable(t *testing.T) {
 		{
 			name: "userAlreadyDisabled",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -139,7 +184,7 @@ func TestUser_Disable(t *testing.T) {
 				},
 			},
 			expected: expected{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -152,7 +197,9 @@ func TestUser_Disable(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
 			err := tt.args.user.Disable()
@@ -164,8 +211,10 @@ func TestUser_Disable(t *testing.T) {
 }
 
 func TestUser_Exists(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
-		user *User
+		user *domain.User
 	}
 
 	type expected struct {
@@ -180,7 +229,7 @@ func TestUser_Exists(t *testing.T) {
 		{
 			name: "successNumericId",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -193,7 +242,7 @@ func TestUser_Exists(t *testing.T) {
 		{
 			name: "successNotNumericId",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "some_id",
 					Name:     "name1",
 					Email:    "email1",
@@ -206,7 +255,7 @@ func TestUser_Exists(t *testing.T) {
 		{
 			name: "noId",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "",
 					Name:     "name1",
 					Email:    "email1",
@@ -219,7 +268,7 @@ func TestUser_Exists(t *testing.T) {
 		{
 			name: "numericZeroId",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "0",
 					Name:     "name1",
 					Email:    "email1",
@@ -232,7 +281,7 @@ func TestUser_Exists(t *testing.T) {
 		{
 			name: "numericNegativeId",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "-3",
 					Name:     "name1",
 					Email:    "email1",
@@ -243,8 +292,14 @@ func TestUser_Exists(t *testing.T) {
 			expected: expected{result: false},
 		},
 		{
-			name:     "blankUser",
-			args:     args{user: &User{}},
+			name: "blankUser",
+			args: args{user: &domain.User{
+				ID:       "",
+				Name:     "",
+				Email:    "",
+				Disabled: false,
+				Version:  0,
+			}},
 			expected: expected{result: false},
 		},
 		{
@@ -254,7 +309,9 @@ func TestUser_Exists(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 			assertions.Equal(tt.expected.result, tt.args.user.Exists())
 		})
@@ -262,13 +319,15 @@ func TestUser_Exists(t *testing.T) {
 }
 
 func TestUser_UpdateFrom(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
-		original    *User
-		mergeTarget User
+		original    *domain.User
+		mergeTarget domain.User
 	}
 
 	type expected struct {
-		merged  *User
+		merged  *domain.User
 		wantErr bool
 	}
 
@@ -280,14 +339,14 @@ func TestUser_UpdateFrom(t *testing.T) {
 		{
 			name: "success",
 			args: args{
-				original: &User{
+				original: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
 					Version:  0,
 				},
-				mergeTarget: User{
+				mergeTarget: domain.User{
 					ID:       "2",
 					Name:     "name2",
 					Email:    "email2",
@@ -296,7 +355,7 @@ func TestUser_UpdateFrom(t *testing.T) {
 				},
 			},
 			expected: expected{
-				merged: &User{
+				merged: &domain.User{
 					ID:       "1",
 					Name:     "name2",
 					Email:    "email2",
@@ -310,7 +369,7 @@ func TestUser_UpdateFrom(t *testing.T) {
 			name: "noOriginal",
 			args: args{
 				original: nil,
-				mergeTarget: User{
+				mergeTarget: domain.User{
 					ID:       "1",
 					Name:     "name2",
 					Email:    "email2",
@@ -326,17 +385,23 @@ func TestUser_UpdateFrom(t *testing.T) {
 		{
 			name: "noTarget",
 			args: args{
-				original: &User{
+				original: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
 					Version:  1,
 				},
-				mergeTarget: User{},
+				mergeTarget: domain.User{
+					ID:       "",
+					Name:     "",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
 			},
 			expected: expected{
-				merged: &User{
+				merged: &domain.User{
 					ID:       "1",
 					Name:     "",
 					Email:    "",
@@ -349,14 +414,14 @@ func TestUser_UpdateFrom(t *testing.T) {
 		{
 			name: "disabledOriginal",
 			args: args{
-				original: &User{
+				original: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: true,
 					Version:  0,
 				},
-				mergeTarget: User{
+				mergeTarget: domain.User{
 					ID:       "2",
 					Name:     "name2",
 					Email:    "email2",
@@ -365,7 +430,7 @@ func TestUser_UpdateFrom(t *testing.T) {
 				},
 			},
 			expected: expected{
-				merged: &User{
+				merged: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -378,14 +443,14 @@ func TestUser_UpdateFrom(t *testing.T) {
 		{
 			name: "disabledTarget",
 			args: args{
-				original: &User{
+				original: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
 					Version:  0,
 				},
-				mergeTarget: User{
+				mergeTarget: domain.User{
 					ID:       "2",
 					Name:     "name2",
 					Email:    "email2",
@@ -394,7 +459,7 @@ func TestUser_UpdateFrom(t *testing.T) {
 				},
 			},
 			expected: expected{
-				merged: &User{
+				merged: &domain.User{
 					ID:       "1",
 					Name:     "name2",
 					Email:    "email2",
@@ -407,14 +472,14 @@ func TestUser_UpdateFrom(t *testing.T) {
 		{
 			name: "originalDoesNotExist",
 			args: args{
-				original: &User{
+				original: &domain.User{
 					ID:       "0",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
 					Version:  0,
 				},
-				mergeTarget: User{
+				mergeTarget: domain.User{
 					ID:       "1",
 					Name:     "name2",
 					Email:    "email2",
@@ -423,7 +488,7 @@ func TestUser_UpdateFrom(t *testing.T) {
 				},
 			},
 			expected: expected{
-				merged: &User{
+				merged: &domain.User{
 					ID:       "0",
 					Name:     "name1",
 					Email:    "email1",
@@ -436,14 +501,14 @@ func TestUser_UpdateFrom(t *testing.T) {
 		{
 			name: "targetDoesNotExist",
 			args: args{
-				original: &User{
+				original: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
 					Disabled: false,
 					Version:  0,
 				},
-				mergeTarget: User{
+				mergeTarget: domain.User{
 					ID:       "0",
 					Name:     "name2",
 					Email:    "email2",
@@ -452,7 +517,7 @@ func TestUser_UpdateFrom(t *testing.T) {
 				},
 			},
 			expected: expected{
-				merged: &User{
+				merged: &domain.User{
 					ID:       "1",
 					Name:     "name2",
 					Email:    "email2",
@@ -465,7 +530,9 @@ func TestUser_UpdateFrom(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
 			err := tt.args.original.UpdateFrom(tt.args.mergeTarget)
@@ -477,8 +544,10 @@ func TestUser_UpdateFrom(t *testing.T) {
 }
 
 func TestUser_String(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
-		user *User
+		user *domain.User
 	}
 
 	type expected struct {
@@ -493,7 +562,7 @@ func TestUser_String(t *testing.T) {
 		{
 			name: "success",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -506,7 +575,7 @@ func TestUser_String(t *testing.T) {
 		{
 			name: "userDoesNotExist",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "0",
 					Name:     "name1",
 					Email:    "email1",
@@ -524,7 +593,7 @@ func TestUser_String(t *testing.T) {
 		{
 			name: "disabledUser",
 			args: args{
-				user: &User{
+				user: &domain.User{
 					ID:       "1",
 					Name:     "name1",
 					Email:    "email1",
@@ -537,7 +606,9 @@ func TestUser_String(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 			assertions.Equal(tt.expected.result, tt.args.user.String())
 		})

@@ -1,11 +1,12 @@
-package user
+package services
 
 import (
-	"github.com/olegshishkin/financier/pkg/core/domain"
-	"github.com/olegshishkin/financier/pkg/core/ports/output"
 	"strings"
 
 	"github.com/pkg/errors"
+
+	"github.com/olegshishkin/financier/pkg/core/domain"
+	"github.com/olegshishkin/financier/pkg/core/ports/output"
 )
 
 type UsrSvc struct {
@@ -16,34 +17,24 @@ func NewService(storage output.UserStorage) *UsrSvc {
 	return &UsrSvc{storage}
 }
 
-func (s *UsrSvc) Create(name, email string) (user *domain.User, err error) {
-	defer func() {
-		if err != nil {
-			err = errors.Wrap(err, "user hasn't been created")
-		}
-	}()
-
+func (s *UsrSvc) Create(name, email string) (*domain.User, error) {
 	if name == "" || email == "" {
-		err = errors.Errorf("invalid args, name: %s, email: %s", name, email)
-		return nil, err
+		return nil, errors.Errorf("invalid args, name: %s, email: %s", name, email)
 	}
 
-	normEmail := strings.ToLower(email)
-
-	user, err = s.storage.FindEnabledByEmail(normEmail)
+	user, err := s.storage.FindEnabledByEmail(strings.ToLower(email))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "user not found")
 	}
 
 	if user != nil {
-		err = errors.Errorf("user with email %s already exists", email)
-		return nil, err
+		return nil, errors.Errorf("user with email %s already exists", email)
 	}
 
-	user = domain.NewUser(name, normEmail)
+	user = domain.NewUser(name, strings.ToLower(email))
 
 	if err = s.storage.Create(user); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "user hasn't been created")
 	}
 
 	return user, nil
@@ -62,34 +53,26 @@ func (s *UsrSvc) Get(email string) (*domain.User, error) {
 	return user, nil
 }
 
-func (s *UsrSvc) Update(user *domain.User) (err error) {
-	defer func() {
-		if err != nil {
-			err = errors.Wrap(err, "user hasn't been updated")
-		}
-	}()
-
+func (s *UsrSvc) Update(user *domain.User) error {
 	if user == nil {
-		err = errors.Errorf("no argument")
-		return err
+		return errors.Errorf("invalid arg: %s", user)
 	}
 
 	original, err := s.storage.Get(user.ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getting user failed")
 	}
 
 	if original == nil {
-		err = errors.Errorf("no user found")
-		return err
+		return errors.Errorf("no user found")
 	}
 
 	if err = original.UpdateFrom(*user); err != nil {
-		return err
+		return errors.Wrap(err, "user hasn't been updated")
 	}
 
 	if err = s.storage.Update(original); err != nil {
-		return err
+		return errors.Wrap(err, "user hasn't been updated")
 	}
 
 	*user = *original
@@ -97,34 +80,26 @@ func (s *UsrSvc) Update(user *domain.User) (err error) {
 	return nil
 }
 
-func (s *UsrSvc) Disable(id string) (err error) {
-	defer func() {
-		if err != nil {
-			err = errors.Wrap(err, "user hasn't been disabled")
-		}
-	}()
-
+func (s *UsrSvc) Disable(id string) error {
 	if id == "" {
-		err = errors.Errorf("invalid arg: %s", id)
-		return err
+		return errors.Errorf("invalid arg: %s", id)
 	}
 
 	user, err := s.storage.Get(id)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getting user failed")
 	}
 
 	if user == nil {
-		err = errors.Errorf("no user found")
-		return err
+		return errors.Errorf("no user found")
 	}
 
 	if err = user.Disable(); err != nil {
-		return err
+		return errors.Wrap(err, "user hasn't been disabled")
 	}
 
 	if err = s.storage.Update(user); err != nil {
-		return err
+		return errors.Wrap(err, "user hasn't been updated")
 	}
 
 	return nil

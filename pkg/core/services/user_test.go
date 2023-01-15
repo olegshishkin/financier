@@ -1,19 +1,36 @@
-package user
+package services_test
 
 import (
 	"errors"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
 	mocks "github.com/olegshishkin/financier/mocks/pkg/core/ports/output"
 	"github.com/olegshishkin/financier/pkg/core/domain"
-	"github.com/stretchr/testify/assert"
-	"testing"
+	"github.com/olegshishkin/financier/pkg/core/ports/output"
+	"github.com/olegshishkin/financier/pkg/core/services"
 )
 
+var errExample = errors.New("")
+
+func createTargetService(storage output.UserStorage) *services.UsrSvc {
+	target := &services.UsrSvc{}
+	services.SetStorage(target, storage)
+
+	return target
+}
+
 func TestService_NewService(t *testing.T) {
+	t.Parallel()
 	storageMock := mocks.NewUserStorage(t)
-	assert.Equal(t, storageMock, NewService(storageMock).storage)
+	svc := services.NewService(storageMock)
+	assert.Equal(t, storageMock, *services.GetStorage(svc))
 }
 
 func TestService_Create(t *testing.T) {
+	t.Parallel()
+
 	type findEnabledByEmailArgs struct {
 		email string
 	}
@@ -67,10 +84,11 @@ func TestService_Create(t *testing.T) {
 			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
-					ID:      "",
-					Name:    "name1",
-					Email:   "email1",
-					Version: 0,
+					ID:       "",
+					Name:     "name1",
+					Email:    "email1",
+					Disabled: false,
+					Version:  0,
 				},
 			},
 			createReturn: createReturn{err: nil},
@@ -92,10 +110,11 @@ func TestService_Create(t *testing.T) {
 			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
-					ID:      "",
-					Name:    "name1",
-					Email:   "email1",
-					Version: 0,
+					ID:       "",
+					Name:     "name1",
+					Email:    "email1",
+					Disabled: false,
+					Version:  0,
 				},
 			},
 			createReturn: createReturn{err: nil},
@@ -136,7 +155,7 @@ func TestService_Create(t *testing.T) {
 			args:                     args{name: "name1", email: "email1"},
 			expected:                 expected{user: nil, wantErr: true},
 			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
-			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errExample},
 		},
 		{
 			name:                     "createFailed",
@@ -146,22 +165,25 @@ func TestService_Create(t *testing.T) {
 			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: nil},
 			createArgs: createArgs{
 				user: &domain.User{
-					ID:      "",
-					Name:    "name1",
-					Email:   "email1",
-					Version: 0,
+					ID:       "",
+					Name:     "name1",
+					Email:    "email1",
+					Disabled: false,
+					Version:  0,
 				},
 			},
-			createReturn: createReturn{err: errors.New("")},
+			createReturn: createReturn{err: errExample},
 		},
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &UsrSvc{storage: storageMock}
+			target := createTargetService(storageMock)
 
 			if tt.findEnabledByEmailArgs.email != "" {
 				storageMock.EXPECT().
@@ -189,6 +211,8 @@ func TestService_Create(t *testing.T) {
 }
 
 func TestService_Disable(t *testing.T) {
+	t.Parallel()
+
 	type getArgs struct {
 		id string
 	}
@@ -225,57 +249,138 @@ func TestService_Disable(t *testing.T) {
 		updateReturn
 	}{
 		{
-			name:         "success",
-			args:         args{id: "1"},
-			expected:     expected{user: &domain.User{ID: "1", Disabled: true, Version: 1}, wantErr: false},
-			getArgs:      getArgs{id: "1"},
-			getReturn:    getReturn{user: &domain.User{ID: "1", Version: 0}, err: nil},
-			updateArgs:   updateArgs{&domain.User{ID: "1", Disabled: true}},
+			name: "success",
+			args: args{id: "1"},
+			expected: expected{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: true,
+					Version:  1,
+				},
+				wantErr: false,
+			},
+			getArgs: getArgs{id: "1"},
+			getReturn: getReturn{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
+				err: nil,
+			},
+			updateArgs: updateArgs{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: true,
+					Version:  0,
+				},
+			},
 			updateReturn: updateReturn{err: nil},
 		},
 		{
-			name:     "noArg",
-			args:     args{id: ""},
-			expected: expected{wantErr: true},
+			name: "noArg",
+			args: args{id: ""},
+			expected: expected{
+				user:    nil,
+				wantErr: true,
+			},
 		},
 		{
-			name:      "noUser",
-			args:      args{id: "1"},
-			expected:  expected{wantErr: true},
+			name: "noUser",
+			args: args{id: "1"},
+			expected: expected{
+				user:    nil,
+				wantErr: true,
+			},
 			getArgs:   getArgs{id: "1"},
 			getReturn: getReturn{user: nil, err: nil},
 		},
 		{
-			name:      "getUserFailed",
-			args:      args{id: "1"},
-			expected:  expected{wantErr: true},
+			name: "getUserFailed",
+			args: args{id: "1"},
+			expected: expected{
+				user:    nil,
+				wantErr: true,
+			},
 			getArgs:   getArgs{id: "1"},
-			getReturn: getReturn{user: nil, err: errors.New("")},
+			getReturn: getReturn{user: nil, err: errExample},
 		},
 		{
-			name:      "disableFailed",
-			args:      args{id: "1"},
-			expected:  expected{user: &domain.User{ID: "1", Disabled: true, Version: 0}, wantErr: true},
-			getArgs:   getArgs{id: "1"},
-			getReturn: getReturn{user: &domain.User{ID: "1", Disabled: true, Version: 0}, err: nil},
+			name: "disableFailed",
+			args: args{id: "1"},
+			expected: expected{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: true,
+					Version:  0,
+				},
+				wantErr: true,
+			},
+			getArgs: getArgs{id: "1"},
+			getReturn: getReturn{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: true,
+					Version:  0,
+				},
+				err: nil,
+			},
 		},
 		{
-			name:         "updateFailed",
-			args:         args{id: "1"},
-			expected:     expected{user: &domain.User{ID: "1", Disabled: true, Version: 0}, wantErr: true},
-			getArgs:      getArgs{id: "1"},
-			getReturn:    getReturn{user: &domain.User{ID: "1", Version: 0}, err: nil},
-			updateArgs:   updateArgs{&domain.User{ID: "1", Disabled: true}},
-			updateReturn: updateReturn{err: errors.New("")},
+			name: "updateFailed",
+			args: args{id: "1"},
+			expected: expected{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: true,
+					Version:  0,
+				},
+				wantErr: true,
+			},
+			getArgs: getArgs{id: "1"},
+			getReturn: getReturn{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: false,
+					Version:  0,
+				},
+				err: nil,
+			},
+			updateArgs: updateArgs{
+				user: &domain.User{
+					ID:       "1",
+					Name:     "",
+					Email:    "",
+					Disabled: true,
+					Version:  0,
+				},
+			},
+			updateReturn: updateReturn{err: errExample},
 		},
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &UsrSvc{storage: storageMock}
+			target := createTargetService(storageMock)
 
 			if tt.getArgs.id != "" {
 				storageMock.EXPECT().
@@ -302,6 +407,8 @@ func TestService_Disable(t *testing.T) {
 }
 
 func TestService_Get(t *testing.T) {
+	t.Parallel()
+
 	type findEnabledByEmailArgs struct {
 		email string
 	}
@@ -338,7 +445,8 @@ func TestService_Get(t *testing.T) {
 					Disabled: false,
 					Version:  0,
 				},
-				wantErr: false},
+				wantErr: false,
+			},
 			findEnabledByEmailArgs: findEnabledByEmailArgs{email: "email1"},
 			findEnabledByEmailReturn: findEnabledByEmailReturn{
 				user: &domain.User{
@@ -348,7 +456,8 @@ func TestService_Get(t *testing.T) {
 					Disabled: false,
 					Version:  0,
 				},
-				err: nil},
+				err: nil,
+			},
 		},
 		{
 			name:     "noEmail",
@@ -360,7 +469,7 @@ func TestService_Get(t *testing.T) {
 			args:                     args{email: "email1"},
 			expected:                 expected{user: nil, wantErr: true},
 			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
-			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errExample},
 		},
 		{
 			name:                     "noUser",
@@ -372,11 +481,13 @@ func TestService_Get(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &UsrSvc{storage: storageMock}
+			target := createTargetService(storageMock)
 
 			if tt.findEnabledByEmailArgs.email != "" {
 				storageMock.EXPECT().
@@ -393,6 +504,8 @@ func TestService_Get(t *testing.T) {
 }
 
 func TestService_Update(t *testing.T) {
+	t.Parallel()
+
 	type getReturn struct {
 		user *domain.User
 		err  error
@@ -427,10 +540,11 @@ func TestService_Update(t *testing.T) {
 			name: "success",
 			args: args{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 1,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  1,
 				},
 			},
 			expected: expected{
@@ -478,18 +592,20 @@ func TestService_Update(t *testing.T) {
 			name: "noUser",
 			args: args{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 0,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  0,
 				},
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 0,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  0,
 				},
 				wantErr: true,
 			},
@@ -502,42 +618,46 @@ func TestService_Update(t *testing.T) {
 			name: "getUserFailed",
 			args: args{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 0,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  0,
 				},
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 0,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  0,
 				},
 				wantErr: true,
 			},
 			getReturn: getReturn{
 				user: nil,
-				err:  errors.New(""),
+				err:  errExample,
 			},
 		},
 		{
 			name: "disabledUser",
 			args: args{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 0,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  0,
 				},
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 0,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  0,
 				},
 				wantErr: true,
 			},
@@ -556,18 +676,20 @@ func TestService_Update(t *testing.T) {
 			name: "updateFailed",
 			args: args{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 1,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  1,
 				},
 			},
 			expected: expected{
 				user: &domain.User{
-					ID:      "1",
-					Name:    "name1_changed",
-					Email:   "email1_changed",
-					Version: 1,
+					ID:       "1",
+					Name:     "name1_changed",
+					Email:    "email1_changed",
+					Disabled: false,
+					Version:  1,
 				},
 				wantErr: true,
 			},
@@ -590,16 +712,18 @@ func TestService_Update(t *testing.T) {
 					Version:  1,
 				},
 			},
-			updateReturn: updateReturn{err: errors.New("")},
+			updateReturn: updateReturn{err: errExample},
 		},
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := &UsrSvc{storage: storageMock}
+			target := createTargetService(storageMock)
 
 			if tt.args.user.Exists() {
 				storageMock.EXPECT().

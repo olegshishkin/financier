@@ -2,8 +2,9 @@ package domain
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type User struct {
@@ -15,7 +16,13 @@ type User struct {
 }
 
 func NewUser(name, email string) *User {
-	return &User{Name: name, Email: email, Disabled: false}
+	return &User{
+		ID:       "",
+		Name:     name,
+		Email:    email,
+		Disabled: false,
+		Version:  0,
+	}
 }
 
 func (u *User) UpdateFrom(user User) error {
