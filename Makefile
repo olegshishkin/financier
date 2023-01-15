@@ -42,7 +42,7 @@ vet: lint
 test: vet
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: test$(RESET_COLOR)'
-	go test ./... -race
+	go test ./... -v -race
 .PHONY:test
 
 cover: test
