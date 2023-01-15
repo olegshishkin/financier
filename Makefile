@@ -1,4 +1,4 @@
-MAIN_FILE_DIR	:= ./cmd/web
+MAIN_FILE_DIR	:= ./cmd/financier
 BINARY_NAME 	:= $(shell basename `pwd`)
 OUT_DIR 		:= ./.out
 REPORT_DIR 		:= report
@@ -30,7 +30,7 @@ lint: dep
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: lint$(RESET_COLOR)'
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run ./... --enable-all -D goimports -D exhaustruct -D exhaustivestruct -D nosnakecase
+	golangci-lint run ./... -c ./.lint/.golangci.yml
 .PHONY:lint
 
 vet: lint
@@ -42,7 +42,7 @@ vet: lint
 test: vet
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: test$(RESET_COLOR)'
-	go test ./... -v -race
+	go test ./... -race
 .PHONY:test
 
 cover: test
