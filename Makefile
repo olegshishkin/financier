@@ -26,14 +26,7 @@ dep: fmt
 	go get -d -x ./...
 .PHONY:dep
 
-lint: dep
-	@echo ''
-	@echo '$(GREEN_COLOR)Step: lint$(RESET_COLOR)'
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run ./... -c ./.lint/.golangci.yml
-.PHONY:lint
-
-vet: lint
+vet: dep
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: vet$(RESET_COLOR)'
 	go vet -c=10 ./...
@@ -42,7 +35,7 @@ vet: lint
 test: vet
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: test$(RESET_COLOR)'
-	go test ./... -v -race
+	go test ./... -race
 .PHONY:test
 
 cover: test
@@ -53,7 +46,14 @@ cover: test
 	go tool cover -html=$(OUT_DIR)/$(REPORT_DIR)/profile.out -o $(OUT_DIR)/$(REPORT_DIR)/coverage.html
 .PHONY:cover
 
-build: cover
+lint: cover
+	@echo ''
+	@echo '$(GREEN_COLOR)Step: lint$(RESET_COLOR)'
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	golangci-lint run ./... -c ./.lint/.golangci.yml
+.PHONY:lint
+
+build: lint
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: build$(RESET_COLOR)'
 	mkdir -p $(OUT_DIR)/$(BINARY_DIR)
