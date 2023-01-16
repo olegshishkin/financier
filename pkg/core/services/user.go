@@ -13,7 +13,7 @@ type UsrSvc struct {
 	storage output.UserStorage
 }
 
-func NewService(storage output.UserStorage) *UsrSvc {
+func NewUserService(storage output.UserStorage) *UsrSvc {
 	return &UsrSvc{storage}
 }
 

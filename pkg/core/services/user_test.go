@@ -21,10 +21,10 @@ func createTargetService(storage output.UserStorage) *services.UsrSvc {
 	return target
 }
 
-func TestService_NewService(t *testing.T) {
+func TestService_NewUserService(t *testing.T) {
 	t.Parallel()
 	storageMock := mocks.NewUserStorage(t)
-	svc := services.NewService(storageMock)
+	svc := services.NewUserService(storageMock)
 	assert.Equal(t, storageMock, *services.GetStorage(svc))
 }
 
