@@ -1,6 +1,12 @@
 package services
 
-import "github.com/olegshishkin/financier/pkg/core/ports/output"
+import (
+	"errors"
+
+	"github.com/olegshishkin/financier/pkg/core/ports/output"
+)
+
+var ErrExample = errors.New("")
 
 func GetUserStorage(svc *UsrSvc) *output.UserStorage {
 	return &svc.storage

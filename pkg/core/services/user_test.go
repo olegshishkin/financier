@@ -1,7 +1,6 @@
 package services_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -153,7 +152,7 @@ func TestUserService_Create(t *testing.T) {
 			args:                     args{name: "name1", email: "email1"},
 			expected:                 expected{user: nil, wantErr: true},
 			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
-			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: services.ErrExample},
 		},
 		{
 			name:                     "createFailed",
@@ -170,7 +169,7 @@ func TestUserService_Create(t *testing.T) {
 					Version:  0,
 				},
 			},
-			createReturn: createReturn{err: errors.New("")},
+			createReturn: createReturn{err: services.ErrExample},
 		},
 	}
 
@@ -307,7 +306,7 @@ func TestUserService_Disable(t *testing.T) {
 				wantErr: true,
 			},
 			getArgs:   getArgs{id: "1"},
-			getReturn: getReturn{user: nil, err: errors.New("")},
+			getReturn: getReturn{user: nil, err: services.ErrExample},
 		},
 		{
 			name: "disableFailed",
@@ -367,7 +366,7 @@ func TestUserService_Disable(t *testing.T) {
 					Version:  0,
 				},
 			},
-			updateReturn: updateReturn{err: errors.New("")},
+			updateReturn: updateReturn{err: services.ErrExample},
 		},
 	}
 
@@ -467,7 +466,7 @@ func TestUserService_Get(t *testing.T) {
 			args:                     args{email: "email1"},
 			expected:                 expected{user: nil, wantErr: true},
 			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
-			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: services.ErrExample},
 		},
 		{
 			name:                     "noUser",
@@ -635,7 +634,7 @@ func TestUserService_Update(t *testing.T) {
 			},
 			getReturn: getReturn{
 				user: nil,
-				err:  errors.New(""),
+				err:  services.ErrExample,
 			},
 		},
 		{
@@ -710,7 +709,7 @@ func TestUserService_Update(t *testing.T) {
 					Version:  1,
 				},
 			},
-			updateReturn: updateReturn{err: errors.New("")},
+			updateReturn: updateReturn{err: services.ErrExample},
 		},
 	}
 
