@@ -12,23 +12,21 @@ import (
 	"github.com/olegshishkin/financier/pkg/core/services"
 )
 
-var errExample = errors.New("")
-
-func createTargetService(storage output.UserStorage) *services.UsrSvc {
+func createUserService(storage output.UserStorage) *services.UsrSvc {
 	target := &services.UsrSvc{}
-	services.SetStorage(target, storage)
+	services.SetUserStorage(target, storage)
 
 	return target
 }
 
-func TestService_NewUserService(t *testing.T) {
+func TestUserService_NewUserService(t *testing.T) {
 	t.Parallel()
 	storageMock := mocks.NewUserStorage(t)
 	svc := services.NewUserService(storageMock)
-	assert.Equal(t, storageMock, *services.GetStorage(svc))
+	assert.Equal(t, storageMock, *services.GetUserStorage(svc))
 }
 
-func TestService_Create(t *testing.T) {
+func TestUserService_Create(t *testing.T) {
 	t.Parallel()
 
 	type findEnabledByEmailArgs struct {
@@ -155,7 +153,7 @@ func TestService_Create(t *testing.T) {
 			args:                     args{name: "name1", email: "email1"},
 			expected:                 expected{user: nil, wantErr: true},
 			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
-			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errExample},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
 		},
 		{
 			name:                     "createFailed",
@@ -172,7 +170,7 @@ func TestService_Create(t *testing.T) {
 					Version:  0,
 				},
 			},
-			createReturn: createReturn{err: errExample},
+			createReturn: createReturn{err: errors.New("")},
 		},
 	}
 
@@ -183,7 +181,7 @@ func TestService_Create(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := createTargetService(storageMock)
+			target := createUserService(storageMock)
 
 			if tt.findEnabledByEmailArgs.email != "" {
 				storageMock.EXPECT().
@@ -210,7 +208,7 @@ func TestService_Create(t *testing.T) {
 	}
 }
 
-func TestService_Disable(t *testing.T) {
+func TestUserService_Disable(t *testing.T) {
 	t.Parallel()
 
 	type getArgs struct {
@@ -309,7 +307,7 @@ func TestService_Disable(t *testing.T) {
 				wantErr: true,
 			},
 			getArgs:   getArgs{id: "1"},
-			getReturn: getReturn{user: nil, err: errExample},
+			getReturn: getReturn{user: nil, err: errors.New("")},
 		},
 		{
 			name: "disableFailed",
@@ -369,7 +367,7 @@ func TestService_Disable(t *testing.T) {
 					Version:  0,
 				},
 			},
-			updateReturn: updateReturn{err: errExample},
+			updateReturn: updateReturn{err: errors.New("")},
 		},
 	}
 
@@ -380,7 +378,7 @@ func TestService_Disable(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := createTargetService(storageMock)
+			target := createUserService(storageMock)
 
 			if tt.getArgs.id != "" {
 				storageMock.EXPECT().
@@ -406,7 +404,7 @@ func TestService_Disable(t *testing.T) {
 	}
 }
 
-func TestService_Get(t *testing.T) {
+func TestUserService_Get(t *testing.T) {
 	t.Parallel()
 
 	type findEnabledByEmailArgs struct {
@@ -469,7 +467,7 @@ func TestService_Get(t *testing.T) {
 			args:                     args{email: "email1"},
 			expected:                 expected{user: nil, wantErr: true},
 			findEnabledByEmailArgs:   findEnabledByEmailArgs{email: "email1"},
-			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errExample},
+			findEnabledByEmailReturn: findEnabledByEmailReturn{user: nil, err: errors.New("")},
 		},
 		{
 			name:                     "noUser",
@@ -487,7 +485,7 @@ func TestService_Get(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := createTargetService(storageMock)
+			target := createUserService(storageMock)
 
 			if tt.findEnabledByEmailArgs.email != "" {
 				storageMock.EXPECT().
@@ -503,7 +501,7 @@ func TestService_Get(t *testing.T) {
 	}
 }
 
-func TestService_Update(t *testing.T) {
+func TestUserService_Update(t *testing.T) {
 	t.Parallel()
 
 	type getReturn struct {
@@ -637,7 +635,7 @@ func TestService_Update(t *testing.T) {
 			},
 			getReturn: getReturn{
 				user: nil,
-				err:  errExample,
+				err:  errors.New(""),
 			},
 		},
 		{
@@ -712,7 +710,7 @@ func TestService_Update(t *testing.T) {
 					Version:  1,
 				},
 			},
-			updateReturn: updateReturn{err: errExample},
+			updateReturn: updateReturn{err: errors.New("")},
 		},
 	}
 
@@ -723,7 +721,7 @@ func TestService_Update(t *testing.T) {
 			assertions := assert.New(t)
 
 			storageMock := mocks.NewUserStorage(t)
-			target := createTargetService(storageMock)
+			target := createUserService(storageMock)
 
 			if tt.args.user.Exists() {
 				storageMock.EXPECT().
