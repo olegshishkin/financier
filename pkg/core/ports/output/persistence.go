@@ -8,3 +8,8 @@ type UserStorage interface {
 	FindEnabledByEmail(email string) (*domain.User, error)
 	Update(user *domain.User) error
 }
+
+type AccountStorage interface {
+	Create(account *domain.Account) error
+	FindEnabledByName(name string) (*domain.Account, error)
+}

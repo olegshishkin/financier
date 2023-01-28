@@ -15,3 +15,11 @@ func GetUserStorage(svc *UsrSvc) *output.UserStorage {
 func SetUserStorage(svc *UsrSvc, storage output.UserStorage) {
 	svc.storage = storage
 }
+
+func GetAccountStorage(svc *AccountService) *output.AccountStorage {
+	return &svc.storage
+}
+
+func SetAccountStorage(svc *AccountService, storage output.AccountStorage) {
+	svc.storage = storage
+}

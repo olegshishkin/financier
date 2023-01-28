@@ -8,3 +8,7 @@ type UserService interface {
 	Update(user *domain.User) error
 	Disable(id string) error
 }
+
+type AccountService interface {
+	Create(name string) (*domain.Account, error)
+}
