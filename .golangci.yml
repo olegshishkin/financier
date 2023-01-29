@@ -44,6 +44,11 @@ linters-settings:
       - iface
       - map
       - chan
+  varnamelen:
+    # The minimum length of a variable's name that is considered "long".
+    # Variable names that are at least this long will be ignored.
+    # Default: 3
+    min-name-length: 2
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
