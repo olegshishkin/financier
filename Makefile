@@ -1,4 +1,4 @@
-MAIN_FILE_DIR	:= ./cmd/financier
+MAIN_FILE_DIR	:= ./cmd/web
 BINARY_NAME 	:= $(shell basename `pwd`)
 OUT_DIR 		:= ./.out
 REPORT_DIR 		:= report
