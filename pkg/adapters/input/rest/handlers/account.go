@@ -12,6 +12,10 @@ type AccountHandler struct {
 	accountSvc input.AccountService
 }
 
+type CreateAccountRq struct {
+	name string
+}
+
 func NewAccountHandler(as input.AccountService) *AccountHandler {
 	return &AccountHandler{
 		accountSvc: as,
@@ -19,9 +23,17 @@ func NewAccountHandler(as input.AccountService) *AccountHandler {
 }
 
 func (h *AccountHandler) CreateAccount(ctx *gin.Context) {
-	acc, err := h.accountSvc.Create(ctx.Param("name"))
+	var rq CreateAccountRq
+
+	if err := ctx.ShouldBindJSON(&rq); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+		return
+	}
+
+	acc, err := h.accountSvc.Create(rq.name)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 
 		return
 	}
