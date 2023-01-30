@@ -13,6 +13,7 @@ var (
 	//nolint:gochecknoglobals
 	WebAppProviderSetStub = wire.NewSet(
 		accountProviderSetStub,
+		provideLogger,
 		provideGinRouter,
 	)
 

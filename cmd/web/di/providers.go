@@ -4,6 +4,11 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/olegshishkin/go-logger"
+	loggin "github.com/olegshishkin/go-logger-gin"
+	logzero "github.com/olegshishkin/go-logger-zerolog"
+	logzeroexample "github.com/olegshishkin/go-logger-zerolog/example"
+	"github.com/rs/zerolog"
 
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/routes"
@@ -24,14 +29,18 @@ var (
 
 	//nolint:gochecknoglobals
 	accStorageOnce sync.Once
+
+	//nolint:gochecknoglobals
+	logOnce sync.Once
 )
 
-func provideGinRouter(accHdl *handlers.AccountHandler) *gin.Engine {
+func provideGinRouter(accHdl *handlers.AccountHandler, log *zerolog.Logger) *gin.Engine {
 	var router *gin.Engine
 
 	ginRouterOnce.Do(func() {
 		recHdl := gin.Recovery()
-		router = routes.GinRouter(accHdl, recHdl)
+		logHdl := loggin.WebServerLogger(logzero.From(logzeroexample.Web(log)))
+		router = routes.GinRouter(accHdl, recHdl, logHdl)
 	})
 
 	return router
@@ -55,4 +64,21 @@ func provideAccountService(as output.AccountStorage) *services.AccountService {
 	})
 
 	return svc
+}
+
+func provideLogger() *zerolog.Logger {
+	var log *zerolog.Logger
+
+	logOnce.Do(func() {
+		writer, err := logzero.NewLogWriterBuilder().
+			WithConsole(logzeroexample.ConsoleWriter()).
+			Build()
+		if err != nil {
+			panic(err)
+		}
+
+		log = logzeroexample.Base(writer, logger.LogLevel())
+	})
+
+	return log
 }

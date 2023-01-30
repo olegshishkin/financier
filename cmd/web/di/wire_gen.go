@@ -16,6 +16,7 @@ func WireStubs() *gin.Engine {
 	accountStorageStub := provideAccountStorageStub()
 	accountService := provideAccountService(accountStorageStub)
 	accountHandler := provideAccountHandler(accountService)
-	engine := provideGinRouter(accountHandler)
+	logger := provideLogger()
+	engine := provideGinRouter(accountHandler, logger)
 	return engine
 }
