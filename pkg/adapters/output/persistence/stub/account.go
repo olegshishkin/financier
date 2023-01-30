@@ -1,6 +1,8 @@
 package stub
 
 import (
+	"strconv"
+
 	"github.com/pkg/errors"
 
 	"github.com/olegshishkin/financier/pkg/core/domain"
@@ -25,7 +27,14 @@ func (s *AccountStorageStub) Create(account *domain.Account) error {
 		return errors.Errorf("account %s already exists", account)
 	}
 
-	account.ID = "1"
+	for _, a := range s.accounts {
+		if a.Name == account.Name {
+			return errors.Errorf("account %s already exists", account)
+		}
+	}
+
+	account.ID = strconv.Itoa(len(s.accounts) + 1)
+	s.accounts = append(s.accounts, account)
 
 	return nil
 }
