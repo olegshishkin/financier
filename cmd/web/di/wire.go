@@ -4,10 +4,11 @@
 package di
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+
+	"github.com/olegshishkin/financier/pkg/adapters/input/rest/server"
 )
 
-func WireStubs() *gin.Engine {
+func Wire() *server.Server {
 	panic(wire.Build(WebAppProviderSetStub))
 }

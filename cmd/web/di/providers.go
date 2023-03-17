@@ -10,8 +10,9 @@ import (
 	logzeroexample "github.com/olegshishkin/go-logger-zerolog/example"
 	"github.com/rs/zerolog"
 
+	"github.com/olegshishkin/financier/api"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
-	"github.com/olegshishkin/financier/pkg/adapters/input/rest/routes"
+	"github.com/olegshishkin/financier/pkg/adapters/input/rest/server"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
 	"github.com/olegshishkin/financier/pkg/core/ports/output"
 	"github.com/olegshishkin/financier/pkg/core/services"
@@ -19,7 +20,10 @@ import (
 
 var (
 	//nolint:gochecknoglobals
-	ginRouterOnce sync.Once
+	serverOnce sync.Once
+
+	//nolint:gochecknoglobals
+	hdlDelegateOnce sync.Once
 
 	//nolint:gochecknoglobals
 	accHandlerOnce sync.Once
@@ -34,16 +38,27 @@ var (
 	logOnce sync.Once
 )
 
-func provideGinRouter(accHdl *handlers.AccountHandler, log *zerolog.Logger) *gin.Engine {
-	var router *gin.Engine
+func provideServer(apiHandler api.ServerInterface, log *zerolog.Logger) *server.Server {
+	var srv *server.Server
 
-	ginRouterOnce.Do(func() {
+	serverOnce.Do(func() {
 		recHdl := gin.Recovery()
 		logHdl := loggin.WebServerLogger(logzero.From(logzeroexample.Web(log)))
-		router = routes.GinRouter(accHdl, recHdl, logHdl)
+		srv = server.NewServer(recHdl, logHdl)
+		srv.RegisterRoutes(apiHandler)
 	})
 
-	return router
+	return srv
+}
+
+func provideHandlerDelegate(ah handlers.AccountHTTPRequestHandler) *handlers.HandlerDelegate {
+	var hd *handlers.HandlerDelegate
+
+	hdlDelegateOnce.Do(func() {
+		hd = handlers.NewHandlerDelegate(ah)
+	})
+
+	return hd
 }
 
 func provideAccountHandler(as input.AccountService) *handlers.AccountHandler {

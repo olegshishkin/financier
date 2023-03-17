@@ -7,16 +7,17 @@
 package di
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/olegshishkin/financier/pkg/adapters/input/rest/server"
 )
 
 // Injectors from wire.go:
 
-func WireStubs() *gin.Engine {
+func Wire() *server.Server {
 	accountStorageStub := provideAccountStorageStub()
 	accountService := provideAccountService(accountStorageStub)
 	accountHandler := provideAccountHandler(accountService)
+	handlerDelegate := provideHandlerDelegate(accountHandler)
 	logger := provideLogger()
-	engine := provideGinRouter(accountHandler, logger)
-	return engine
+	serverServer := provideServer(handlerDelegate, logger)
+	return serverServer
 }

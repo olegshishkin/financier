@@ -5,15 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/olegshishkin/financier/api"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
 )
 
-type AccountHandler struct {
-	accountSvc input.AccountService
+type AccountHTTPRequestHandler interface {
+	GetAllAccounts(c *gin.Context)
+	AddAccount(c *gin.Context)
+	FindAccountByID(c *gin.Context, id api.Id)
 }
 
-type createAccountRq struct {
-	Name string `json:"name" binding:"required"`
+type AccountHandler struct {
+	accountSvc input.AccountService
 }
 
 func NewAccountHandler(as input.AccountService) *AccountHandler {
@@ -22,8 +25,8 @@ func NewAccountHandler(as input.AccountService) *AccountHandler {
 	}
 }
 
-func (h *AccountHandler) CreateAccount(ctx *gin.Context) {
-	var rq createAccountRq
+func (h *AccountHandler) AddAccount(ctx *gin.Context) {
+	var rq api.NewAccount
 
 	if err := ctx.ShouldBindJSON(&rq); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -39,4 +42,12 @@ func (h *AccountHandler) CreateAccount(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, acc)
+}
+
+func (h *AccountHandler) GetAllAccounts(ctx *gin.Context) {
+	ctx.JSON(http.StatusNotImplemented, "")
+}
+
+func (h *AccountHandler) FindAccountByID(ctx *gin.Context, id api.Id) {
+	ctx.JSON(http.StatusNotImplemented, "")
 }

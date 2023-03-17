@@ -3,6 +3,8 @@ package di
 import (
 	"github.com/google/wire"
 
+	"github.com/olegshishkin/financier/api"
+	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 	"github.com/olegshishkin/financier/pkg/adapters/output/persistence/stub"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
 	"github.com/olegshishkin/financier/pkg/core/ports/output"
@@ -14,7 +16,10 @@ var (
 	WebAppProviderSetStub = wire.NewSet(
 		accountProviderSetStub,
 		provideLogger,
-		provideGinRouter,
+		provideHandlerDelegate,
+		provideServer,
+		wire.Bind(new(handlers.AccountHTTPRequestHandler), new(*handlers.AccountHandler)),
+		wire.Bind(new(api.ServerInterface), new(*handlers.HandlerDelegate)),
 	)
 
 	//nolint:gochecknoglobals
