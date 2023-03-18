@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/olegshishkin/financier/api"
+	"github.com/olegshishkin/financier/api/v1"
 )
 
 type HandlerDelegate struct {

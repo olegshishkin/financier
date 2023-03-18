@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/olegshishkin/financier/api"
+	"github.com/olegshishkin/financier/api/v1"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
 )
 

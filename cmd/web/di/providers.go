@@ -10,7 +10,7 @@ import (
 	logzeroexample "github.com/olegshishkin/go-logger-zerolog/example"
 	"github.com/rs/zerolog"
 
-	"github.com/olegshishkin/financier/api"
+	"github.com/olegshishkin/financier/api/v1"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/server"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"

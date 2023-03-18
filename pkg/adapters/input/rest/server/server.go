@@ -6,7 +6,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/olegshishkin/financier/api"
+	"github.com/olegshishkin/financier/api/v1"
 )
 
 type Server struct {

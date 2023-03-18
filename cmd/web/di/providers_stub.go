@@ -3,7 +3,7 @@ package di
 import (
 	"github.com/google/wire"
 
-	"github.com/olegshishkin/financier/api"
+	"github.com/olegshishkin/financier/api/v1"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 	"github.com/olegshishkin/financier/pkg/adapters/output/persistence/stub"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
