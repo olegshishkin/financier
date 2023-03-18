@@ -48,6 +48,6 @@ func (h *AccountHandler) GetAllAccounts(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotImplemented, "")
 }
 
-func (h *AccountHandler) FindAccountByID(ctx *gin.Context, id api.Id) {
+func (h *AccountHandler) FindAccountByID(ctx *gin.Context, _ api.Id) {
 	ctx.JSON(http.StatusNotImplemented, "")
 }

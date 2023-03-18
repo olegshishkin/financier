@@ -24,7 +24,6 @@ func (h *HandlerDelegate) GetAllAccounts(ctx *gin.Context) {
 	h.accountHdl.GetAllAccounts(ctx)
 }
 
-//nolint:revive,stylecheck
-func (h *HandlerDelegate) FindAccountById(ctx *gin.Context, id api.Id) {
+func (h *HandlerDelegate) FindAccountByID(ctx *gin.Context, id api.Id) {
 	h.accountHdl.FindAccountByID(ctx, id)
 }

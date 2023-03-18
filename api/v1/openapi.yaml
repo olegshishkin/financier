@@ -58,7 +58,7 @@ paths:
   /accounts/{id}:
     get:
       description: Returns an account by its ID.
-      operationId: find account by id
+      operationId: findAccountByID
       parameters:
         - name: id
           in: path

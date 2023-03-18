@@ -53,7 +53,7 @@ type ServerInterface interface {
 	AddAccount(c *gin.Context)
 
 	// (GET /accounts/{id})
-	FindAccountById(c *gin.Context, id Id)
+	FindAccountByID(c *gin.Context, id Id)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -85,8 +85,8 @@ func (siw *ServerInterfaceWrapper) AddAccount(c *gin.Context) {
 	siw.Handler.AddAccount(c)
 }
 
-// FindAccountById operation middleware
-func (siw *ServerInterfaceWrapper) FindAccountById(c *gin.Context) {
+// FindAccountByID operation middleware
+func (siw *ServerInterfaceWrapper) FindAccountByID(c *gin.Context) {
 
 	var err error
 
@@ -103,7 +103,7 @@ func (siw *ServerInterfaceWrapper) FindAccountById(c *gin.Context) {
 		middleware(c)
 	}
 
-	siw.Handler.FindAccountById(c, id)
+	siw.Handler.FindAccountByID(c, id)
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -139,7 +139,7 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 
 	router.POST(options.BaseURL+"/accounts", wrapper.AddAccount)
 
-	router.GET(options.BaseURL+"/accounts/:id", wrapper.FindAccountById)
+	router.GET(options.BaseURL+"/accounts/:id", wrapper.FindAccountByID)
 
 	return router
 }
@@ -147,19 +147,19 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
