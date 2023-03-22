@@ -2,6 +2,8 @@ package di
 
 import (
 	"github.com/google/wire"
+	"github.com/olegshishkin/go-logger"
+	zerolog "github.com/olegshishkin/go-logger-zerolog"
 
 	"github.com/olegshishkin/financier/api/v1"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
@@ -14,12 +16,17 @@ import (
 var (
 	//nolint:gochecknoglobals
 	WebAppProviderSetStub = wire.NewSet(
-		accountProviderSetStub,
-		provideLogger,
-		provideHandlerDelegate,
 		provideServer,
+		provideServerMiddlewares,
+		provideHandlerDelegate,
+		provideSwaggerHandler,
+		accountProviderSetStub,
+		provideWebLogger,
+		provideSourceLogger,
+		wire.Bind(new(handlers.SwaggerHTTPRequestHandler), new(*handlers.SwaggerHandler)),
 		wire.Bind(new(handlers.AccountHTTPRequestHandler), new(*handlers.AccountHandler)),
-		wire.Bind(new(api.ServerInterface), new(*handlers.HandlerDelegate)),
+		wire.Bind(new(logger.Logger), new(*zerolog.Wrapper)),
+		wire.Bind(new(v1.ServerInterface), new(*handlers.HandlerDelegate)),
 	)
 
 	//nolint:gochecknoglobals

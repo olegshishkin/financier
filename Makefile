@@ -17,7 +17,7 @@ clean:
 generate: clean
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: generate$(RESET_COLOR)'
-	go install github.com/vektra/mockery/v2@latest
+	go install github.com/vektra/mockery/v3@latest
 	go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 	go install github.com/google/wire/cmd/wire@latest
 	go generate ./...

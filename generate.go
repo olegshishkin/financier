@@ -1,10 +1,12 @@
 package financier
 
-// Mocks generation
-//go:generate mockery --name=.*Storage --recursive --keeptree --with-expecter
+// OpenAPI
+//go:generate oapi-codegen -generate types -o ./api/v1/model.go -package v1 ./api/v1/openapi.yaml
+//go:generate oapi-codegen -generate gin -o ./api/v1/handlers.go -package v1 ./api/v1/openapi.yaml
+//go:generate oapi-codegen -generate spec -o ./api/v1/swagger.go -package v1 ./api/v1/openapi.yaml
 
-// OpenAPI model generation
-//go:generate oapi-codegen --package=api -generate=types,spec,gin -o=./api/v1/openapi.go ./api/v1/openapi.yaml
+// Mocks
+//go:generate mockery --name=.*Storage --recursive --keeptree --with-expecter --config=./mocks/.mockery
 
 // Dependency injection
 //go:generate wire ./...

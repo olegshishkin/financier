@@ -6,13 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/olegshishkin/financier/api/v1"
+	"github.com/olegshishkin/financier/pkg/adapters/input/rest"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
 )
 
 type AccountHTTPRequestHandler interface {
 	GetAllAccounts(c *gin.Context)
 	AddAccount(c *gin.Context)
-	FindAccountByID(c *gin.Context, id api.Id)
+	FindAccountByID(c *gin.Context, id v1.ID)
 }
 
 type AccountHandler struct {
@@ -26,17 +27,17 @@ func NewAccountHandler(as input.AccountService) *AccountHandler {
 }
 
 func (h *AccountHandler) AddAccount(ctx *gin.Context) {
-	var rq api.NewAccount
+	var rq v1.NewAccount
 
 	if err := ctx.ShouldBindJSON(&rq); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		rest.Err(ctx, http.StatusBadRequest, rest.Tech, err)
 
 		return
 	}
 
 	acc, err := h.accountSvc.Create(rq.Name)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		rest.Err(ctx, http.StatusBadRequest, rest.Business, err)
 
 		return
 	}
@@ -48,6 +49,6 @@ func (h *AccountHandler) GetAllAccounts(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotImplemented, "")
 }
 
-func (h *AccountHandler) FindAccountByID(ctx *gin.Context, _ api.Id) {
+func (h *AccountHandler) FindAccountByID(ctx *gin.Context, _ v1.ID) {
 	ctx.JSON(http.StatusNotImplemented, "")
 }

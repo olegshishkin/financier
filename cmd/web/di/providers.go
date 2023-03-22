@@ -3,14 +3,11 @@ package di
 import (
 	"sync"
 
-	"github.com/gin-gonic/gin"
 	"github.com/olegshishkin/go-logger"
-	loggin "github.com/olegshishkin/go-logger-gin"
 	logzero "github.com/olegshishkin/go-logger-zerolog"
 	logzeroexample "github.com/olegshishkin/go-logger-zerolog/example"
 	"github.com/rs/zerolog"
 
-	"github.com/olegshishkin/financier/api/v1"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/server"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
@@ -26,6 +23,9 @@ var (
 	hdlDelegateOnce sync.Once
 
 	//nolint:gochecknoglobals
+	swgHandlerOnce sync.Once
+
+	//nolint:gochecknoglobals
 	accHandlerOnce sync.Once
 
 	//nolint:gochecknoglobals
@@ -35,30 +35,56 @@ var (
 	accStorageOnce sync.Once
 
 	//nolint:gochecknoglobals
-	logOnce sync.Once
+	middlewareOnce sync.Once
+
+	//nolint:gochecknoglobals
+	webLogOnce sync.Once
+
+	//nolint:gochecknoglobals
+	sourceLogOnce sync.Once
 )
 
-func provideServer(apiHandler api.ServerInterface, log *zerolog.Logger) *server.Server {
+func provideServer(log logger.Logger, handlers *handlers.HandlerDelegate, mdl *server.Middlewares) *server.Server {
 	var srv *server.Server
 
 	serverOnce.Do(func() {
-		recHdl := gin.Recovery()
-		logHdl := loggin.WebServerLogger(logzero.From(logzeroexample.Web(log)))
-		srv = server.NewServer(recHdl, logHdl)
-		srv.RegisterRoutes(apiHandler)
+		srv = server.NewServer(log)
+		srv.RegisterSwaggerHandler(handlers, mdl)
+		srv.RegisterHandlers(handlers, mdl)
 	})
 
 	return srv
 }
 
-func provideHandlerDelegate(ah handlers.AccountHTTPRequestHandler) *handlers.HandlerDelegate {
+func provideServerMiddlewares(log logger.Logger) *server.Middlewares {
+	var mdl *server.Middlewares
+
+	middlewareOnce.Do(func() {
+		mdl = server.NewMiddlewares(log)
+	})
+
+	return mdl
+}
+
+//nolint:lll
+func provideHandlerDelegate(sh handlers.SwaggerHTTPRequestHandler, ah handlers.AccountHTTPRequestHandler) *handlers.HandlerDelegate {
 	var hd *handlers.HandlerDelegate
 
 	hdlDelegateOnce.Do(func() {
-		hd = handlers.NewHandlerDelegate(ah)
+		hd = handlers.NewHandlerDelegate(sh, ah)
 	})
 
 	return hd
+}
+
+func provideSwaggerHandler(log logger.Logger) *handlers.SwaggerHandler {
+	var hdl *handlers.SwaggerHandler
+
+	swgHandlerOnce.Do(func() {
+		hdl = handlers.NewSwaggerHandler(log)
+	})
+
+	return hdl
 }
 
 func provideAccountHandler(as input.AccountService) *handlers.AccountHandler {
@@ -81,10 +107,20 @@ func provideAccountService(as output.AccountStorage) *services.AccountService {
 	return svc
 }
 
-func provideLogger() *zerolog.Logger {
+func provideWebLogger(zeroLogger *zerolog.Logger) *logzero.Wrapper {
+	var log *logzero.Wrapper
+
+	webLogOnce.Do(func() {
+		log = logzero.From(logzeroexample.Web(zeroLogger))
+	})
+
+	return log
+}
+
+func provideSourceLogger() *zerolog.Logger {
 	var log *zerolog.Logger
 
-	logOnce.Do(func() {
+	sourceLogOnce.Do(func() {
 		writer, err := logzero.NewLogWriterBuilder().
 			WithConsole(logzeroexample.ConsoleWriter()).
 			Build()

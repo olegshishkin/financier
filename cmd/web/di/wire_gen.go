@@ -13,11 +13,14 @@ import (
 // Injectors from wire.go:
 
 func Wire() *server.Server {
+	logger := provideSourceLogger()
+	wrapper := provideWebLogger(logger)
+	swaggerHandler := provideSwaggerHandler(wrapper)
 	accountStorageStub := provideAccountStorageStub()
 	accountService := provideAccountService(accountStorageStub)
 	accountHandler := provideAccountHandler(accountService)
-	handlerDelegate := provideHandlerDelegate(accountHandler)
-	logger := provideLogger()
-	serverServer := provideServer(handlerDelegate, logger)
+	handlerDelegate := provideHandlerDelegate(swaggerHandler, accountHandler)
+	middlewares := provideServerMiddlewares(wrapper)
+	serverServer := provideServer(wrapper, handlerDelegate, middlewares)
 	return serverServer
 }
