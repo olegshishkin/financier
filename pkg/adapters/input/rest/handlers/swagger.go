@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"os"
-
 	"github.com/gin-gonic/gin"
 	"github.com/olegshishkin/go-logger"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/swag"
+
+	v1 "github.com/olegshishkin/financier/api/v1"
 )
 
 type SwaggerHTTPRequestHandler interface {
@@ -31,9 +31,14 @@ func (h *SwaggerHandler) GetSwagger(ctx *gin.Context) {
 }
 
 func configureSwagger(log logger.Logger) gin.HandlerFunc {
-	content, err := os.ReadFile("api/v1/openapi.yaml")
+	swagger, err := v1.GetSwagger()
 	if err != nil {
-		log.Fatal(err, "OpenAPI specification importing error")
+		log.Fatal(err, "OpenAPI specification extracting failed")
+	}
+
+	json, err := swagger.MarshalJSON()
+	if err != nil {
+		log.Fatal(err, "OpenAPI specification hasn't been fetched from the binary Swagger object")
 	}
 
 	spec := &swag.Spec{
@@ -44,7 +49,7 @@ func configureSwagger(log logger.Logger) gin.HandlerFunc {
 		Title:            "",
 		Description:      "",
 		InfoInstanceName: "swagger",
-		SwaggerTemplate:  string(content),
+		SwaggerTemplate:  string(json),
 	}
 
 	swag.New()
