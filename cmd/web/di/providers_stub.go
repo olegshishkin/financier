@@ -15,27 +15,37 @@ import (
 
 var (
 	//nolint:gochecknoglobals
-	WebAppProviderSetStub = wire.NewSet(
-		provideServer,
-		provideServerMiddlewares,
-		provideHandlerDelegate,
-		provideSwaggerHandler,
-		accountProviderSetStub,
+	loggerProviderSetStub = wire.NewSet(
 		provideWebLogger,
 		provideSourceLogger,
-		wire.Bind(new(handlers.SwaggerHTTPRequestHandler), new(*handlers.SwaggerHandler)),
-		wire.Bind(new(handlers.AccountHTTPRequestHandler), new(*handlers.AccountHandler)),
 		wire.Bind(new(logger.Logger), new(*zerolog.Wrapper)),
-		wire.Bind(new(v1.ServerInterface), new(*handlers.HandlerDelegate)),
 	)
 
 	//nolint:gochecknoglobals
 	accountProviderSetStub = wire.NewSet(
-		provideAccountHandler,
-		provideAccountService,
 		provideAccountStorageStub,
+		provideAccountService,
+		provideAccountHandler,
 		wire.Bind(new(input.AccountService), new(*services.AccountService)),
 		wire.Bind(new(output.AccountStorage), new(*stub.AccountStorageStub)),
+	)
+
+	//nolint:gochecknoglobals
+	handlersProviderSetStub = wire.NewSet(
+		accountProviderSetStub,
+		provideSwaggerHandler,
+		provideHandlerDelegate,
+		wire.Bind(new(handlers.SwaggerHTTPRequestHandler), new(*handlers.SwaggerHandler)),
+		wire.Bind(new(handlers.AccountHTTPRequestHandler), new(*handlers.AccountHandler)),
+	)
+
+	//nolint:gochecknoglobals
+	WebAppProviderSetStub = wire.NewSet(
+		loggerProviderSetStub,
+		handlersProviderSetStub,
+		provideServerMiddlewares,
+		provideServer,
+		wire.Bind(new(v1.ServerInterface), new(*handlers.HandlerDelegate)),
 	)
 )
 
