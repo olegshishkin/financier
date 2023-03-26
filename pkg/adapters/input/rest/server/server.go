@@ -22,7 +22,9 @@ type Server struct {
 }
 
 func NewServer(cfg *config.Config, log logger.Logger) *Server {
-	gin.SetMode(cfg.Server.Mode)
+	if mode := cfg.Server.Mode; mode != "" {
+		gin.SetMode(mode)
+	}
 
 	return &Server{
 		router: gin.New(),
@@ -52,8 +54,13 @@ func (s *Server) RegisterSwaggerHandler(handlers *handlers.HandlerDelegate, mdl 
 }
 
 func (s *Server) Start() {
-	addr := fmt.Sprintf("%v:%v", s.host, s.port)
-	if err := s.router.Run(addr); err != nil {
+	var addr []string
+
+	if port := s.port; port != "" {
+		addr = append(addr, fmt.Sprintf("%v:%v", s.host, port))
+	}
+
+	if err := s.router.Run(addr...); err != nil {
 		s.log.Fatal(err, "Web Server error")
 	}
 }

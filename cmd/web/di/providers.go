@@ -139,12 +139,7 @@ func provideSourceLogger(cfg *config.Config) *zerolog.Logger {
 			panic(err)
 		}
 
-		lvl, err := logger.ParseLevel(cfg.Logging.Level)
-		if err != nil {
-			panic(err)
-		}
-
-		log = logzeroexample.Base(writer, lvl)
+		log = logzeroexample.Base(writer, logLevel(cfg))
 	})
 
 	return log
@@ -158,4 +153,19 @@ func provideConfig() *config.Config {
 	})
 
 	return cfg
+}
+
+func logLevel(cfg *config.Config) logger.Level {
+	lvlCfg := cfg.Logging.Level
+
+	if lvlCfg == "" {
+		return logger.LogLevel()
+	}
+
+	lvl, err := logger.ParseLevel(lvlCfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return lvl
 }
