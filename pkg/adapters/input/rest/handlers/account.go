@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/olegshishkin/olsh-go-utils/types"
 
 	"github.com/olegshishkin/financier/api/v1"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest"
+	"github.com/olegshishkin/financier/pkg/adapters/input/rest/mapper"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
 )
 
@@ -35,14 +37,14 @@ func (h *AccountHandler) AddAccount(ctx *gin.Context) {
 		return
 	}
 
-	acc, err := h.accountSvc.Create(rq.Name)
+	acc, err := h.accountSvc.Create(rq.Name, types.PointerVal(rq.Comment))
 	if err != nil {
 		rest.Err(ctx, http.StatusBadRequest, rest.Business, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, acc)
+	ctx.JSON(http.StatusCreated, mapper.AccountToAccountOut(acc))
 }
 
 func (h *AccountHandler) GetAllAccounts(ctx *gin.Context) {

@@ -10,6 +10,7 @@ require (
 	github.com/olegshishkin/go-logger v1.1.0
 	github.com/olegshishkin/go-logger-gin v0.0.5
 	github.com/olegshishkin/go-logger-zerolog v0.2.2
+	github.com/olegshishkin/olsh-go-utils v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.15.0
