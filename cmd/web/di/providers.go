@@ -8,6 +8,7 @@ import (
 	logzeroexample "github.com/olegshishkin/go-logger-zerolog/example"
 	"github.com/rs/zerolog"
 
+	"github.com/olegshishkin/financier/config"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/server"
 	"github.com/olegshishkin/financier/pkg/core/ports/input"
@@ -42,13 +43,21 @@ var (
 
 	//nolint:gochecknoglobals
 	sourceLogOnce sync.Once
+
+	//nolint:gochecknoglobals
+	configOnce sync.Once
 )
 
-func provideServer(log logger.Logger, handlers *handlers.HandlerDelegate, mdl *server.Middlewares) *server.Server {
+func provideServer(
+	cfg *config.Config,
+	log logger.Logger,
+	handlers *handlers.HandlerDelegate,
+	mdl *server.Middlewares,
+) *server.Server {
 	var srv *server.Server
 
 	serverOnce.Do(func() {
-		srv = server.NewServer(log)
+		srv = server.NewServer(cfg, log)
 		srv.RegisterSwaggerHandler(handlers, mdl)
 		srv.RegisterHandlers(handlers, mdl)
 	})
@@ -66,8 +75,10 @@ func provideServerMiddlewares(log logger.Logger) *server.Middlewares {
 	return mdl
 }
 
-//nolint:lll
-func provideHandlerDelegate(sh handlers.SwaggerHTTPRequestHandler, ah handlers.AccountHTTPRequestHandler) *handlers.HandlerDelegate {
+func provideHandlerDelegate(
+	sh handlers.SwaggerHTTPRequestHandler,
+	ah handlers.AccountHTTPRequestHandler,
+) *handlers.HandlerDelegate {
 	var hd *handlers.HandlerDelegate
 
 	hdlDelegateOnce.Do(func() {
@@ -117,7 +128,7 @@ func provideWebLogger(zeroLogger *zerolog.Logger) *logzero.Wrapper {
 	return log
 }
 
-func provideSourceLogger() *zerolog.Logger {
+func provideSourceLogger(cfg *config.Config) *zerolog.Logger {
 	var log *zerolog.Logger
 
 	sourceLogOnce.Do(func() {
@@ -128,8 +139,23 @@ func provideSourceLogger() *zerolog.Logger {
 			panic(err)
 		}
 
-		log = logzeroexample.Base(writer, logger.LogLevel())
+		lvl, err := logger.ParseLevel(cfg.Logging.Level)
+		if err != nil {
+			panic(err)
+		}
+
+		log = logzeroexample.Base(writer, lvl)
 	})
 
 	return log
+}
+
+func provideConfig() *config.Config {
+	var cfg *config.Config
+
+	configOnce.Do(func() {
+		cfg = config.ReadConfig()
+	})
+
+	return cfg
 }

@@ -41,6 +41,7 @@ var (
 
 	//nolint:gochecknoglobals
 	WebAppProviderSetStub = wire.NewSet(
+		provideConfig,
 		loggerProviderSetStub,
 		handlersProviderSetStub,
 		provideServerMiddlewares,

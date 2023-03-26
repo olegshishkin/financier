@@ -1,0 +1,10 @@
+# Logger settings
+logging:
+  level: trace
+
+# Server settings
+server:
+  host:
+  port: 8080
+  # Gin-mode: release, debug, test
+  mode: debug

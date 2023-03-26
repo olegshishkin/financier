@@ -1,10 +1,13 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/olegshishkin/go-logger"
 
 	v1 "github.com/olegshishkin/financier/api/v1"
+	"github.com/olegshishkin/financier/config"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest"
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 )
@@ -14,12 +17,18 @@ const apiRootPath = "/api/v1"
 type Server struct {
 	router *gin.Engine
 	log    logger.Logger
+	host   string
+	port   string
 }
 
-func NewServer(log logger.Logger) *Server {
+func NewServer(cfg *config.Config, log logger.Logger) *Server {
+	gin.SetMode(cfg.Server.Mode)
+
 	return &Server{
 		router: gin.New(),
 		log:    log,
+		host:   cfg.Server.Host,
+		port:   cfg.Server.Port,
 	}
 }
 
@@ -43,7 +52,8 @@ func (s *Server) RegisterSwaggerHandler(handlers *handlers.HandlerDelegate, mdl 
 }
 
 func (s *Server) Start() {
-	if err := s.router.Run(); err != nil {
+	addr := fmt.Sprintf("%v:%v", s.host, s.port)
+	if err := s.router.Run(addr); err != nil {
 		s.log.Fatal(err, "Web Server error")
 	}
 }
