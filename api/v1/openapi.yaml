@@ -27,7 +27,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Account'
+                  $ref: '#/components/schemas/AccountOutput'
         default:
           description: unexpected error
           content:
@@ -45,14 +45,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewAccount'
+              $ref: '#/components/schemas/NewAccountInput'
       responses:
         '201':
           description: account creation response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountOutput'
         default:
           description: unexpected error
           content:
@@ -78,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountOutput'
         '404':
           description: no account
           content:
@@ -94,30 +94,48 @@ paths:
 components:
   schemas:
     ID:
-      description: The ID
+      description: Object unique identifier.
       type: string
       nullable: false
       minLength: 1
       maxLength: 36
       example: 123
       x-oapi-codegen-extra-tags:
-        binding: "required,max=36"
-    NewAccount:
+        binding: "required,min=1,max=36"
+    Version:
+      description: Object version. Used for optimistic locking.
+      type: string
+      format: uint64
+      minimum: 0
+      example: 16
+      x-oapi-codegen-extra-tags:
+        binding: "required,numeric,gte=0"
+    NewAccountInput:
+      description: Input for a new account creation.
       type: object
       properties:
         name:
-          description: Account name
+          description: Account name.
           type: string
           nullable: false
           minLength: 1
           maxLength: 255
           example: wallet
           x-oapi-codegen-extra-tags:
-            binding: "required,max=255"
+            binding: "required,min=1,max=255"
+        comment:
+          description: Account comment.
+          type: string
+          minLength: 0
+          maxLength: 255
+          example: My new account
+          x-oapi-codegen-extra-tags:
+            binding: "omitempty,min=0,max=255"
       required:
         - name
       additionalProperties: false
-    Account:
+    AccountOutput:
+      description: Account.
       allOf:
         - type: object
           properties:
@@ -125,28 +143,59 @@ components:
               $ref: '#/components/schemas/ID'
           required:
             - id
-        - $ref: '#/components/schemas/NewAccount'
+          additionalProperties: false
+        - $ref: '#/components/schemas/NewAccountInput'
+        - type: object
+          properties:
+            balance:
+              description: |
+                Current account balance. The balance is represented by an integer to ensure accuracy. \
+                To determine the real balance, you need to divide the current number by 100.
+              type: integer
+              format: int64
+              minimum: 0
+              example: 1203
+              x-oapi-codegen-extra-tags:
+                binding: "required,numeric"
+            disabled:
+              description: Account activity status.
+              type: boolean
+              example: true
+              x-oapi-codegen-extra-tags:
+                binding: "required,boolean"
+          required:
+            - balance
+            - disabled
+          additionalProperties: false
+        - type: object
+          properties:
+            version:
+              $ref: '#/components/schemas/Version'
+          required:
+            - version
+          additionalProperties: false
     Error:
+      description: Error structure.
       type: object
       properties:
         code:
-          description: Error code
+          description: Error code.
           type: integer
           format: int8
           minimum: 0
           maximum: 127
           example: 1
           x-oapi-codegen-extra-tags:
-            binding: "required,gte=0,lte=127"
+            binding: "required,numeric,gte=0,lte=127"
         message:
-          description: Error message
+          description: Error message.
           type: string
           nullable: false
           minLength: 1
           maxLength: 4000
           example: Unexpected error
           x-oapi-codegen-extra-tags:
-            binding: "required,max=4000"
+            binding: "required,min=1,max=4000"
       required:
         - code
         - message

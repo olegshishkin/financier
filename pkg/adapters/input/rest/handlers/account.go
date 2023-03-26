@@ -27,7 +27,7 @@ func NewAccountHandler(as input.AccountService) *AccountHandler {
 }
 
 func (h *AccountHandler) AddAccount(ctx *gin.Context) {
-	var rq v1.NewAccount
+	var rq v1.NewAccountInput
 
 	if err := ctx.ShouldBindJSON(&rq); err != nil {
 		rest.Err(ctx, http.StatusBadRequest, rest.Tech, err)
