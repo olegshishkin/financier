@@ -12,7 +12,8 @@ func TestNewAccount(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		name string
+		name    string
+		comment string
 	}
 
 	type expected struct {
@@ -26,13 +27,13 @@ func TestNewAccount(t *testing.T) {
 	}{
 		{
 			name: "success",
-			args: args{name: "name1"},
+			args: args{name: "name1", comment: "com1"},
 			expected: expected{
 				account: &domain.Account{
 					ID:       "",
 					Name:     "name1",
 					Balance:  0,
-					Comment:  "",
+					Comment:  "com1",
 					Disabled: false,
 					Version:  0,
 				},
@@ -40,7 +41,7 @@ func TestNewAccount(t *testing.T) {
 		},
 		{
 			name: "noArgs",
-			args: args{name: ""},
+			args: args{name: "", comment: ""},
 			expected: expected{
 				account: &domain.Account{
 					ID:       "",
@@ -54,7 +55,7 @@ func TestNewAccount(t *testing.T) {
 		},
 		{
 			name: "onlyName",
-			args: args{name: "name1"},
+			args: args{name: "name1", comment: ""},
 			expected: expected{
 				account: &domain.Account{
 					ID:       "",
@@ -74,7 +75,7 @@ func TestNewAccount(t *testing.T) {
 			t.Parallel()
 			assertions := assert.New(t)
 
-			account := domain.NewAccount(tt.args.name)
+			account := domain.NewAccount(tt.args.name, tt.args.comment)
 
 			assertions.Equal(tt.expected.account, account)
 		})

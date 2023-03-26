@@ -15,7 +15,7 @@ func NewAccountService(storage output.AccountStorage) *AccountService {
 	return &AccountService{storage}
 }
 
-func (s *AccountService) Create(name string) (*domain.Account, error) {
+func (s *AccountService) Create(name, comment string) (*domain.Account, error) {
 	if name == "" {
 		return nil, errors.Errorf("invalid args, name: %s", name)
 	}
@@ -29,7 +29,7 @@ func (s *AccountService) Create(name string) (*domain.Account, error) {
 		return nil, errors.Errorf("account %s already exists", name)
 	}
 
-	account = domain.NewAccount(name)
+	account = domain.NewAccount(name, comment)
 
 	if err = s.storage.Create(account); err != nil {
 		return nil, errors.Wrap(err, "account hasn't been created")

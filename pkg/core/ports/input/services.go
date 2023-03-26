@@ -10,5 +10,5 @@ type UserService interface {
 }
 
 type AccountService interface {
-	Create(name string) (*domain.Account, error)
+	Create(name, comment string) (*domain.Account, error)
 }

@@ -46,7 +46,8 @@ func TestAccountService_Create(t *testing.T) {
 	}
 
 	type args struct {
-		name string
+		name    string
+		comment string
 	}
 
 	type expected struct {
@@ -65,13 +66,13 @@ func TestAccountService_Create(t *testing.T) {
 	}{
 		{
 			name: "success",
-			args: args{name: "name1"},
+			args: args{name: "name1", comment: "com1"},
 			expected: expected{
 				account: &domain.Account{
 					ID:       "1",
 					Name:     "name1",
 					Balance:  0,
-					Comment:  "",
+					Comment:  "com1",
 					Disabled: false,
 					Version:  0,
 				},
@@ -84,7 +85,7 @@ func TestAccountService_Create(t *testing.T) {
 					ID:       "",
 					Name:     "name1",
 					Balance:  0,
-					Comment:  "",
+					Comment:  "com1",
 					Disabled: false,
 					Version:  0,
 				},
@@ -93,12 +94,12 @@ func TestAccountService_Create(t *testing.T) {
 		},
 		{
 			name:     "noName",
-			args:     args{name: ""},
+			args:     args{name: "", comment: "com1"},
 			expected: expected{account: nil, wantErr: true},
 		},
 		{
 			name:                  "accountAlreadyExists",
-			args:                  args{name: "name1"},
+			args:                  args{name: "name1", comment: "com1"},
 			expected:              expected{account: nil, wantErr: true},
 			findEnabledByNameArgs: findEnabledByNameArgs{name: "name1"},
 			findEnabledByNameReturn: findEnabledByNameReturn{
@@ -115,14 +116,14 @@ func TestAccountService_Create(t *testing.T) {
 		},
 		{
 			name:                    "findAccountFailed",
-			args:                    args{name: "name1"},
+			args:                    args{name: "name1", comment: "com1"},
 			expected:                expected{account: nil, wantErr: true},
 			findEnabledByNameArgs:   findEnabledByNameArgs{name: "name1"},
 			findEnabledByNameReturn: findEnabledByNameReturn{account: nil, err: services.ErrExample},
 		},
 		{
 			name:                    "createFailed",
-			args:                    args{name: "name1"},
+			args:                    args{name: "name1", comment: "com1"},
 			expected:                expected{account: nil, wantErr: true},
 			findEnabledByNameArgs:   findEnabledByNameArgs{name: "name1"},
 			findEnabledByNameReturn: findEnabledByNameReturn{account: nil, err: nil},
@@ -131,7 +132,7 @@ func TestAccountService_Create(t *testing.T) {
 					ID:       "",
 					Name:     "name1",
 					Balance:  0,
-					Comment:  "",
+					Comment:  "com1",
 					Disabled: false,
 					Version:  0,
 				},
@@ -166,7 +167,7 @@ func TestAccountService_Create(t *testing.T) {
 					Return(tt.createReturn.err)
 			}
 
-			account, err := target.Create(tt.args.name)
+			account, err := target.Create(tt.args.name, tt.args.comment)
 
 			assertions.True((err != nil) == tt.expected.wantErr)
 			assertions.Equal(tt.expected.account, account)

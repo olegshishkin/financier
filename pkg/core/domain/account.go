@@ -14,13 +14,13 @@ type Account struct {
 	Version  uint64
 }
 
-func NewAccount(name string) *Account {
+func NewAccount(name, comment string) *Account {
 	return &Account{
 		ID:       "",
 		Name:     name,
 		Balance:  0,
 		Disabled: false,
-		Comment:  "",
+		Comment:  comment,
 		Version:  0,
 	}
 }
