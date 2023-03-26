@@ -4,12 +4,14 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 COPY . ./
-RUN go build -o /financier
+RUN go build -o /financier ./cmd/web
 
 FROM alpine:3.17.2
+WORKDIR /
 COPY --from=build /financier /financier
-COPY --from=build /app/config /config
-EXPOSE 8080
+COPY --from=build /app/config/files /config
+ARG PORTS
+EXPOSE ${PORTS}
 RUN adduser -D nonroot
 USER nonroot
 ENTRYPOINT ["/financier"]

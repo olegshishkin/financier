@@ -1,11 +1,14 @@
-MAIN_FILE_DIR	:= ./cmd/web
-BINARY_NAME 	:= $(shell basename `pwd`)
-OUT_DIR 		:= ./.out
-REPORT_DIR 		:= report
-BINARY_DIR 		:= bin
-GREEN_COLOR  	:= $(shell tput -Txterm setaf 2)
-RESET_COLOR  	:= $(shell tput -Txterm sgr0)
-.DEFAULT_GOAL 	:= build
+MAIN_FILE_DIR				:= ./cmd/web
+BINARY_NAME 				:= $(shell basename `pwd`)
+CONTAINER_ENGINE_COMMAND	:= podman
+CONTAINER_IMAGE_NAME 		:= 'financier'
+CONTAINER_PORT 				:= 8080
+OUT_DIR 					:= ./.out
+REPORT_DIR 					:= report
+BINARY_DIR 					:= bin
+GREEN_COLOR  				:= $(shell tput -Txterm setaf 2)
+RESET_COLOR  				:= $(shell tput -Txterm sgr0)
+.DEFAULT_GOAL 				:= build
 
 clean:
 	@echo ''
@@ -14,13 +17,16 @@ clean:
 	rm -rf $(OUT_DIR)
 .PHONY: clean
 
-generate: clean
+prepare: clean
+	@echo ''
+	@echo '$(GREEN_COLOR)Step: prepare$(RESET_COLOR)'
+	./scripts/prepare.sh
+.PHONY: prepare
+
+generate: prepare
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: generate$(RESET_COLOR)'
-	go install github.com/vektra/mockery/v3@latest
-	go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
-	go install github.com/google/wire/cmd/wire@latest
-	go generate ./...
+	./scripts/generate.sh
 .PHONY: generate
 
 fmt: generate
@@ -58,8 +64,7 @@ cover: test
 lint: cover
 	@echo ''
 	@echo '$(GREEN_COLOR)Step: lint$(RESET_COLOR)'
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	golangci-lint run ./...
+	golangci-lint run ./... -c ./scripts/.golangci.yaml
 .PHONY:lint
 
 build: lint
@@ -69,3 +74,9 @@ build: lint
 	go build -o $(OUT_DIR)/$(BINARY_DIR)/$(BINARY_NAME) $(MAIN_FILE_DIR)
 	ls -alh $(OUT_DIR)/$(BINARY_DIR)/$(BINARY_NAME)
 .PHONY:build
+
+image: build
+	@echo ''
+	@echo '$(GREEN_COLOR)Step: image$(RESET_COLOR)'
+	./scripts/image.sh -e $(CONTAINER_ENGINE_COMMAND) -i $(CONTAINER_IMAGE_NAME) -p $(CONTAINER_PORT)
+.PHONY:image
