@@ -15,7 +15,6 @@ on:
 
 env:
   GO_VERSION: 1.19
-  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   IMAGE_EXPOSED_PORTS: 8080
 
@@ -50,7 +49,9 @@ jobs:
           version: latest
           args: -c ./scripts/.golangci.yaml
 
-  image:
+  image-github:
+    env:
+      REGISTRY: ghcr.io
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -79,3 +80,26 @@ jobs:
           file: ./build/package/Dockerfile
           build-args: |
             PORTS=${{ env.IMAGE_EXPOSED_PORTS }}
+
+  image-yc:
+    env:
+      REGISTRY: cr.yandex
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: YC Registry Login
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      - name: Build and push Docker image
+        run: |
+          docker buildx build \
+          --tag ${{ env.REGISTRY }}/${{ vars.CR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --build-arg PORTS=${{ env.IMAGE_EXPOSED_PORTS }} \
+          --file ./build/package/Dockerfile \
+          --push .
