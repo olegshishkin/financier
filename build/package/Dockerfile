@@ -7,6 +7,7 @@ COPY . ./
 RUN go build -o /financier ./cmd/web
 
 FROM alpine:3.17.2
+ENV	TZ=UTC
 WORKDIR /
 COPY --from=build /financier /financier
 COPY --from=build /app/config/files /config
