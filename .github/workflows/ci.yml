@@ -1,79 +1,40 @@
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 name: CI
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
-    tags:
-      - v*
     branches:
-      - main
   pull_request:
-    branches:
-      - main
 
 env:
   GO_VERSION: 1.19
-  IMAGE_REGISTRY: ${{ vars.YC_REGISTRY }}
-  IMAGE_REPOSITORY: ${{ vars.YC_REPOSITORY }}
-  IMAGE_NAME: financier
-  IMAGE_EXPOSED_PORTS: 8080
 
 jobs:
 
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
+        if: github.event.workflow_call == true
         uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Build
-#        run: make
-        run: go build -v ./...
-      - name: Container registry login
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-        uses: yc-actions/yc-cr-login@v1
-        with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-      - name: Container image metadata action
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-        uses: docker/metadata-action@v4
-        id: meta
-        with:
-          images: |
-            ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern=v{{major}}
-            type=ref,event=branch
-            type=sha,format=long
-      - name: Build and push container image
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          file: ./build/package/Dockerfile
-          build-args: |
-            PORTS=${{ env.IMAGE_EXPOSED_PORTS }}
-      - name: Run container
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-        uses: yc-actions/yc-sls-container-deploy@v2
 
+      - name: Build application
+        run: make
+
+      - name: Tar files
+        if: github.event.workflow_call
+        run: tar -cvf files.tar .
+
+      - name: Upload artifact
+        if: github.event.workflow_call
+        uses: actions/upload-artifact@v3
         with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          container-name: ${{ env.IMAGE_NAME }}
-          folder-id: ${{ vars.YC_CONTAINER_FOLDER_ID }}
-          revision-service-account-id: ${{ vars.YC_SA_ID }}
-          revision-cores: ${{ vars.YC_CONTAINER_CPU_CORES }}
-          revision-memory: ${{ vars.YC_CONTAINER_RAM }}
-          revision-core-fraction: ${{ vars.YC_CONTAINER_CORE_FRACTION }}
-          revision-concurrency: ${{ vars.YC_CONTAINER_CONCURRENCY }}
-          revision-image-url: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
-          revision-execution-timeout: ${{ vars.YC_CONTAINER_EXECUTION_TIMEOUT }}
+          name: artifact
+          path: files.tar
+          if-no-files-found: error
