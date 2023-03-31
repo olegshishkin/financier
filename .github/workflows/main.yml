@@ -1,39 +1,58 @@
-name: CD
-
+name: Main pipeline
 on:
   workflow_dispatch:
   push:
+    branches:
     tags:
       - v*
-
+  pull_request:
 env:
+  GO_VERSION: 1.19
   IMAGE_REGISTRY: ${{ vars.YC_REGISTRY }}
   IMAGE_REPOSITORY: ${{ vars.YC_REPOSITORY }}
   IMAGE_NAME: ${{ github.event.repository.name }}
   IMAGE_EXPOSED_PORTS: 8080
-
 jobs:
-
   build:
-    uses: ./.github/workflows/ci.yml
-
-  deploy:
-    needs: build
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        if: github.event.workflow_call
+        uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build application
+        run: make
+      - name: Tar files
+        if: github.event.workflow_call
+        run: tar -cvf ./artifact.tar .
+      - name: Upload artifact
+        if: github.event.workflow_call
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact
+          path: ./artifact.tar
+          if-no-files-found: error
+  push:
+    needs:
+      -build
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags') }}
+    outputs:
+      imageVersion: ${{ steps.meta.outputs.version }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: artifact
-
       - name: Un-Tar files
-        run: tar –xvf files.tar
-
+        run: tar –xvf ./artifact.tar
       - name: Container registry login
         uses: yc-actions/yc-cr-login@v1
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-
       - name: Get container image metadata
         uses: docker/metadata-action@v4
         id: meta
@@ -46,7 +65,6 @@ jobs:
             type=semver,pattern=v{{major}}
             type=ref,event=branch
             type=sha,format=long
-
       - name: Build and push container image
         uses: docker/build-push-action@v4
         with:
@@ -57,7 +75,13 @@ jobs:
           file: ./build/package/Dockerfile
           build-args: |
             PORTS=${{ env.IMAGE_EXPOSED_PORTS }}
-
+  deploy:
+    needs:
+      - build
+      - push
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags') }}
+    steps:
       - name: Run container
         uses: yc-actions/yc-sls-container-deploy@v2
         with:
@@ -69,5 +93,5 @@ jobs:
           revision-memory: ${{ vars.YC_CONTAINER_RAM }}
           revision-core-fraction: ${{ vars.YC_CONTAINER_CORE_FRACTION }}
           revision-concurrency: ${{ vars.YC_CONTAINER_CONCURRENCY }}
-          revision-image-url: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          revision-image-url: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ needs.push.outputs.imageVersion }}
           revision-execution-timeout: ${{ vars.YC_CONTAINER_EXECUTION_TIMEOUT }}
