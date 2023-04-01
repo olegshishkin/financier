@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      needDeploy: ${{ env.NEED_DEPLOY }}
+      needDeploy: ${{ env.NEED_DEPLOY == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -29,10 +29,10 @@ jobs:
       - name: Build application
         run: make
       - name: Tar files
-        if: ${{ env.NEED_DEPLOY }}
+        if: ${{ env.NEED_DEPLOY == 'true' }}
         run: tar -cvf ./artifact.tar .
       - name: Upload artifact
-        if: ${{ env.NEED_DEPLOY }}
+        if: ${{ env.NEED_DEPLOY == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: artifact
@@ -42,7 +42,7 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
-    if: ${{ needs.build.outputs.needDeploy }}
+    if: ${{ needs.build.outputs.needDeploy == 'true' }}
     outputs:
       imageVersion: ${{ steps.meta.outputs.version }}
     steps:
@@ -83,7 +83,7 @@ jobs:
       - build
       - push
     runs-on: ubuntu-latest
-    if: ${{ needs.build.outputs.needDeploy }}
+    if: ${{ needs.build.outputs.needDeploy == 'true' }}
     steps:
       - name: Run container
         uses: yc-actions/yc-sls-container-deploy@v2
