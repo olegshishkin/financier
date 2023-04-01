@@ -51,7 +51,7 @@ jobs:
         with:
           name: artifact
       - name: Un-Tar files
-        run: tar –xvf ./artifact.tar
+        run: tar -xvf ./artifact.tar
       - name: Container registry login
         uses: yc-actions/yc-cr-login@v1
         with:
