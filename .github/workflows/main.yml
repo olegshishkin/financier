@@ -42,7 +42,7 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
-    if: ${{ jobs.build.needDeploy }}
+    if: ${{ needs.build.outputs.needDeploy }}
     outputs:
       imageVersion: ${{ steps.meta.outputs.version }}
     steps:
@@ -83,7 +83,7 @@ jobs:
       - build
       - push
     runs-on: ubuntu-latest
-    if: ${{ jobs.build.needDeploy }}
+    if: ${{ needs.build.outputs.needDeploy }}
     steps:
       - name: Run container
         uses: yc-actions/yc-sls-container-deploy@v2
