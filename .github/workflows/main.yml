@@ -10,8 +10,8 @@ on:
 env:
   GO_VERSION: 1.19
   NEED_DEPLOY: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags') }}
-  IMAGE_REGISTRY: ${{ vars.YC_REGISTRY }}
-  IMAGE_REPOSITORY: ${{ vars.YC_REPOSITORY }}
+  IMAGE_REGISTRY: ${{ secrets.YC_REGISTRY }}
+  IMAGE_REPOSITORY: ${{ secrets.YC_REPOSITORY }}
   IMAGE_NAME: ${{ github.event.repository.name }}
   IMAGE_EXPOSED_PORTS: 8080
 jobs:
@@ -91,8 +91,8 @@ jobs:
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           container-name: ${{ env.IMAGE_NAME }}
-          folder-id: ${{ vars.YC_CONTAINER_FOLDER_ID }}
-          revision-service-account-id: ${{ vars.YC_SA_ID }}
+          folder-id: ${{ secrets.YC_CONTAINER_FOLDER_ID }}
+          revision-service-account-id: ${{ secrets.YC_SA_ID }}
           revision-cores: ${{ vars.YC_CONTAINER_CPU_CORES }}
           revision-memory: ${{ vars.YC_CONTAINER_RAM }}
           revision-core-fraction: ${{ vars.YC_CONTAINER_CORE_FRACTION }}
