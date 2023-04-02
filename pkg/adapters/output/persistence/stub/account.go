@@ -52,3 +52,7 @@ func (s *AccountStorageStub) FindEnabledByName(name string) (*domain.Account, er
 
 	return nil, nil
 }
+
+func (s *AccountStorageStub) FindAll() ([]*domain.Account, error) {
+	return s.accounts, nil
+}

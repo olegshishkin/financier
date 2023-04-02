@@ -11,4 +11,5 @@ type UserService interface {
 
 type AccountService interface {
 	Create(name, comment string) (*domain.Account, error)
+	GetAll() ([]*domain.Account, error)
 }

@@ -37,3 +37,12 @@ func (s *AccountService) Create(name, comment string) (*domain.Account, error) {
 
 	return account, nil
 }
+
+func (s *AccountService) GetAll() ([]*domain.Account, error) {
+	accounts, err := s.storage.FindAll()
+	if err != nil {
+		return nil, errors.Wrap(err, "can't get all accounts")
+	}
+
+	return accounts, nil
+}

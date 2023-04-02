@@ -48,7 +48,14 @@ func (h *AccountHandler) AddAccount(ctx *gin.Context) {
 }
 
 func (h *AccountHandler) GetAllAccounts(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, "")
+	accounts, err := h.accountSvc.GetAll()
+	if err != nil {
+		rest.Err(ctx, http.StatusInternalServerError, rest.Tech, err)
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, mapper.AccountsToAccountsOut(accounts))
 }
 
 func (h *AccountHandler) FindAccountByID(ctx *gin.Context, _ v1.ID) {

@@ -57,6 +57,51 @@ func (_c *AccountStorage_Create_Call) Return(_a0 error) *AccountStorage_Create_C
 	return _c
 }
 
+// FindAll provides a mock function with given fields:
+func (_m *AccountStorage) FindAll() ([]*domain.Account, error) {
+	ret := _m.Called()
+
+	var r0 []*domain.Account
+	if rf, ok := ret.Get(0).(func() []*domain.Account); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*domain.Account)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AccountStorage_FindAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindAll'
+type AccountStorage_FindAll_Call struct {
+	*mock.Call
+}
+
+// FindAll is a helper method to define mock.On call
+func (_e *AccountStorage_Expecter) FindAll() *AccountStorage_FindAll_Call {
+	return &AccountStorage_FindAll_Call{Call: _e.mock.On("FindAll")}
+}
+
+func (_c *AccountStorage_FindAll_Call) Run(run func()) *AccountStorage_FindAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *AccountStorage_FindAll_Call) Return(_a0 []*domain.Account, _a1 error) *AccountStorage_FindAll_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // FindEnabledByName provides a mock function with given fields: name
 func (_m *AccountStorage) FindEnabledByName(name string) (*domain.Account, error) {
 	ret := _m.Called(name)

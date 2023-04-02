@@ -25,6 +25,19 @@ func AccountToAccountOut(src *domain.Account) *v1.AccountOutput {
 	}
 }
 
+func AccountsToAccountsOut(src []*domain.Account) []*v1.AccountOutput {
+	if src == nil {
+		return nil
+	}
+
+	result := make([]*v1.AccountOutput, len(src))
+	for i, acc := range src {
+		result[i] = AccountToAccountOut(acc)
+	}
+
+	return result
+}
+
 func AccountOutToAccount(src *v1.AccountOutput) (*domain.Account, error) {
 	if src == nil {
 		return nil, nil

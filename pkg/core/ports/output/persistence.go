@@ -12,4 +12,5 @@ type UserStorage interface {
 type AccountStorage interface {
 	Create(account *domain.Account) error
 	FindEnabledByName(name string) (*domain.Account, error)
+	FindAll() ([]*domain.Account, error)
 }
