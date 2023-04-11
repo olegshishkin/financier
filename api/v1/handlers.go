@@ -14,13 +14,13 @@ import (
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
-	// (GET /accounts)
+	// (GET /api/v1/accounts)
 	GetAllAccounts(c *gin.Context)
 
-	// (POST /accounts)
+	// (POST /api/v1/accounts)
 	AddAccount(c *gin.Context)
 
-	// (GET /accounts/{id})
+	// (GET /api/v1/accounts/{id})
 	FindAccountByID(c *gin.Context, id ID)
 }
 
@@ -103,11 +103,11 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/accounts", wrapper.GetAllAccounts)
+	router.GET(options.BaseURL+"/api/v1/accounts", wrapper.GetAllAccounts)
 
-	router.POST(options.BaseURL+"/accounts", wrapper.AddAccount)
+	router.POST(options.BaseURL+"/api/v1/accounts", wrapper.AddAccount)
 
-	router.GET(options.BaseURL+"/accounts/:id", wrapper.FindAccountByID)
+	router.GET(options.BaseURL+"/api/v1/accounts/:id", wrapper.FindAccountByID)
 
 	return router
 }

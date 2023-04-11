@@ -12,8 +12,6 @@ import (
 	"github.com/olegshishkin/financier/pkg/adapters/input/rest/handlers"
 )
 
-const apiRootPath = "/api/v1"
-
 type Server struct {
 	router *gin.Engine
 	log    logger.Logger
@@ -38,7 +36,7 @@ func (s *Server) RegisterHandlers(handlers *handlers.HandlerDelegate, mdl *Middl
 	s.router.Use(mdl.Recovery, mdl.Logging, mdl.OpenAPIValidation)
 
 	opts := v1.GinServerOptions{
-		BaseURL:     apiRootPath,
+		BaseURL:     "",
 		Middlewares: nil,
 		ErrorHandler: func(c *gin.Context, err error, statusCode int) {
 			rest.Err(c, statusCode, rest.Tech, err)
